@@ -1,5 +1,7 @@
 {
   "global": {
+    "kWh": "kWh",
+    "kWh/s": "kWh/h",
     "avg": "Average",
     "machineTypeNotif": "Machine Type Custom Settings",
     "weatherSettings": "Weather Settings",
@@ -220,7 +222,7 @@
     "firstWidget": {
       "totalWork": "Total Working Hours",
       "totalidle": "Total Idle Hours",
-      "fuel": "Used Fuel"
+      "fuel": "Energy Consumption"
     },
     "secondWidget": {
       "pic": "Machine Picture",

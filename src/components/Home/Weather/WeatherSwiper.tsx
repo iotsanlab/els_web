@@ -73,10 +73,15 @@ const WeatherSwiper = () => {
             (condition) => condition.EN === conditionText
           );
 
-          const translatedDesc = conditionTranslation
-            ? conditionTranslation[currentLanguage.toUpperCase() as keyof typeof conditionTranslation]
-            : conditionText;
+          const getLanguage = (language: string): keyof typeof conditionTranslation => {
+            if (language === "tr-TR") return "TR" as keyof typeof conditionTranslation;
+            if (language === "en-US") return "EN" as keyof typeof conditionTranslation;
+            return language.toUpperCase() as keyof typeof conditionTranslation;
+          };
 
+          const translatedDesc = conditionTranslation
+          ? conditionTranslation[getLanguage(currentLanguage)]
+          : conditionText;
           return {
             title: `${
               location?.name === "Antep"

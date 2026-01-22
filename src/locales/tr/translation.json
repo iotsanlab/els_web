@@ -1,5 +1,7 @@
 {
   "global": {
+    "kWh": "kWh",
+    "kWh/s": "kWh/s",
     "avg": "Ortalama",
     "machineTypeNotif": "Makine Tipi Özel Ayarlar",
     "weatherSettings": "Hava Durumu Ayarları",
@@ -218,7 +220,7 @@
     "firstWidget": {
       "totalWork": "Toplam Çalışma Süresi",
       "totalidle": "Toplam Rölanti Süresi",
-      "fuel": "Kullanılan Yakıt"
+      "fuel": "Tüketilen Enerji"
     },
     "secondWidget": {
       "pic": "Araç Resmi",

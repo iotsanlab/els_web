@@ -167,11 +167,7 @@ const MachineList: React.FC<Props> = ({ deviceData }) => {
           </span>
         </div>
         
-        <div className="h-full w-[90px] items-center bg-white dark:bg-gray10 dark:border-gray8 pl-1 flex border-l-[0.5px] border-l-gray2 border-b-[0.5px] border-b-gray2">
-          <span className="text-xs font-medium tracking-wide truncate text-gray6 font-inter ">
-            {t("generalMachinesPage.secondWidget.fuelLvl")}
-          </span>
-        </div>
+        
         
         {/* Çalışma Süresi Sütunu - Sıralanabilir */}
         <div

@@ -74,15 +74,15 @@ const InfoBar = ({ weeklyData, monthlyData }: InfoBarProps) => {
      
 
       <div className="flex items-center justify-start w-full h-full mr-2">
-        <SvgIcons iconName="Fuel" fill={isDarkMode ? '#fff' : '#28333E'} />
+        <SvgIcons iconName="Energy" fill={isDarkMode ? '#fff' : '#28333E'} />
         <div className="flex flex-col ">
           <span className="text-xs font-medium text-gray4 dark:text-gray7 font-inter ">
             {t("generalMachinesPage.firstWidget.fuel")}
           </span>
           <div className="inline-flex items-center">
-            <span className="text-gray10 font-inter font-bold text-base 2xl:text-base lg:text-[14px] mr-1 dark:text-white truncate">{formatNumber(data.fuelUsed)} {t("global.lt")}</span>
+            <span className="text-gray10 font-inter font-bold text-base 2xl:text-base lg:text-[14px] mr-1 dark:text-white truncate">{formatNumber(data.fuelUsed)} {t("global.kWh/s")}</span>
             <SvgIcons iconName={isFuelIncrease ? "UpRate" : "DownRate"} fill={isFuelIncrease ? "#E84747" : "#5EB044"} />
-            <span className="text-gray4 font-inter font-medium text-base 2xl:text-base lg:text-[14px] ml-1 dark:text-gray7 truncate">({formatNumber(data.fuelRate)} {t("global.lt")})</span>
+            <span className="text-gray4 font-inter font-medium text-base 2xl:text-base lg:text-[14px] ml-1 dark:text-gray7 truncate">({formatNumber(data.fuelRate)} {t("global.kWh/s")})</span>
           </div>
         </div>
       </div>

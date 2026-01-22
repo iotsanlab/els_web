@@ -69,9 +69,7 @@ const MachineBar = ({ machine, index, handleClick }: { machine: Machine; index: 
       >
         <span className={`text-xs font-medium tracking-wide text-gray6 font-inter ${machine.warnings > 0 ? "bg-statusRed px-[10px] py-[2px] rounded-[10px] text-white cursor-pointer" : "bg-transparent"}`}>{machine.warnings > 0 ? `${machine.warnings} ${machine.warnings.length > 1 ? t("global.warnings") : t("global.warning")}` : "-"}</span>
       </div>
-      <div className="h-full w-[90px] items-center justify-center flex border-l-[0.5px] border-l-gray2 border-b-[0.5px] border-b-gray2 dark:border-gray8">
-        <span className="text-xs font-medium tracking-wide text-gray6 font-inter">{machine.fuel_level !== "NaN" ? machine.fuel_level + "%" : "-"}</span>
-      </div>
+     
       <div className="h-full w-[120px] items-center flex pl-3 lg:pl-[8px] border-l-[0.5px] border-l-gray2 border-b-[0.5px] border-b-gray2 dark:border-gray8">
         <span className="text-xs font-medium tracking-wide text-gray6 font-inter">{parseFloat(machine.totalWorkingHours).toFixed(2)} {t("global.hour")}</span>
       </div>
