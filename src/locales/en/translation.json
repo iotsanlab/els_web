@@ -36,7 +36,7 @@
     "addNew": "+ Add New",
     "dropDrag": "drag/drop",
     "noAssig": "Not Assigned",
-    "fuelGraphTitle": "Fuel Consumption (L)",
+    "fuelGraphTitle": "Energy Consumption (kWh/s)",
     "workingGraphTitle": "Working Hours (h)",
     "save": "Save",
     "cancel": "Cancel",

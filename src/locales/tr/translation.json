@@ -35,7 +35,7 @@
     "addNew": "+ Yeni Ekle",
     "dropDrag": "sürükle/bırak",
     "noAssig": "Atanmamış",
-    "fuelGraphTitle": "Yakıt Tüketimi (Lt)",
+    "fuelGraphTitle": "Tüketilen Enerji (kWh/s)",
     "workingGraphTitle": "Çalışma Süresi (sa.)",
     "save": "Kaydet",
     "cancel": "İptal",
