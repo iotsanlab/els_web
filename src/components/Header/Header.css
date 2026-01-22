@@ -1,0 +1,101 @@
+.navbar {
+    background-color: #FFA600;
+}
+
+.navbar-brand {
+    font-weight: "400";
+    font-size: 1.2rem;
+    color: "#000000";
+    margin-left: 10px; /* Logodan uzaklık */
+    font-family: Righ;
+}
+
+.mst-text {
+        font-family: 'CustomFont', sans-serif; /* Özel fontunuzu kullanın */
+        font-weight: bold; /* İsterseniz yazı tipi kalınlığını ayarlayın */
+        color: #FF5722; /* Rengi değiştirin */
+        font-size: 1.5rem; /* Font boyutunu ayarlayın */
+}
+
+/* Modal genel boyut ve merkezleme */
+.custom-modal .modal-dialog {
+    max-width: 600px; /* Modal genişliği */
+    position: absolute;
+    right: 40px;
+    top: 30px
+}
+
+/* Modal içeriği */
+.custom-modal-content {
+    background-color: #f8f9fa; /* Arkaplan rengi */
+    border-radius: 10px; /* Yuvarlak köşeler */
+    border: 2px solid #007bff; /* Mavi kenarlık */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); /* Hafif gölge */
+}
+
+/* Modal başlığı */
+.custom-modal-header {
+    background-color: #007bff; /* Başlık arkaplan rengi */
+    color: white; /* Başlık yazı rengi */
+    border-bottom: 2px solid #0056b3; /* Alt kenarlık */
+}
+
+/* Modal gövdesi */
+.custom-modal-body {
+    font-size: 16px;
+    color: #212529; /* Yazı rengi */
+    padding: 20px;
+    line-height: 1.5;
+}
+
+/* Modal altbilgisi */
+.custom-modal-footer {
+    background-color: #f1f1f1; /* Alt kısım arkaplan rengi */
+    border-top: 1px solid #ddd; /* Üst kenarlık */
+    text-align: right;
+}
+
+/* Close butonları */
+.custom-modal-header .btn-close {
+    background-color: white; /* Arkaplan rengi */
+    color: #007bff; /* Renk */
+    border: 1px solid #007bff; /* Kenarlık */
+    border-radius: 50%; /* Yuvarlak */
+    padding: 5px; /* İç boşluk */
+}
+
+/* Close butonu hover */
+.custom-modal-header .btn-close:hover {
+    background-color: #0056b3;
+    color: white;
+    border-color: #0056b3;
+}
+
+/* Save changes butonu */
+.custom-modal-footer .btn-primary {
+    background-color: #28a745; /* Yeşil arkaplan */
+    border: none;
+}
+
+/* Save changes hover */
+.custom-modal-footer .btn-primary:hover {
+    background-color: #218838;
+}
+
+
+.search-button-icon {
+    
+        position: absolute;
+        left:0;
+        top: 50%;
+        transform: translateY(-50%)
+    
+}
+
+@media  screen and (max-width: 600px) {
+    .search-button-icon {
+    background-color: red;
+    
+    }
+
+  }

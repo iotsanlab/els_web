@@ -1,0 +1,43 @@
+ # Temel URL yeniden yazma kuralları
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+
+# Varolan dosya ve dizinleri yoksay
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Gerçek dosyalar için istekleri engelleme (statik dosyalar için)
+RewriteCond %{REQUEST_URI} !\.(?:css|js|jpg|jpeg|png|gif|ico|svg|woff|woff2|ttf|eot|map)$ [NC]
+
+# Tüm diğer istekleri index.html'e yönlendir
+RewriteRule ^ index.html [L]
+</IfModule>
+
+# CORS ve güvenlik başlıkları
+<IfModule mod_headers.c>
+Header set Access-Control-Allow-Origin "*"
+Header set X-Content-Type-Options "nosniff"
+Header set X-Frame-Options "SAMEORIGIN"
+</IfModule>
+
+# Önbellekleme kuralları
+<IfModule mod_expires.c>
+ExpiresActive On
+
+# HTML için önbellekleme yok
+ExpiresByType text/html "access plus 0 seconds"
+
+# Statik dosyalar için önbellekleme
+ExpiresByType text/css "access plus 1 month"
+ExpiresByType application/javascript "access plus 1 month"
+ExpiresByType image/jpeg "access plus 1 month"
+ExpiresByType image/png "access plus 1 month"
+ExpiresByType image/svg+xml "access plus 1 month"
+ExpiresByType image/x-icon "access plus 1 month"
+</IfModule>
+
+# Sıkıştırma
+<IfModule mod_deflate.c>
+AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript text/javascript
+</IfModule> 
