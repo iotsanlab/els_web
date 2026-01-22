@@ -1,7 +1,7 @@
 {
   "global": {
     "kWh": "kWh",
-    "kWh/s": "kWh/h",
+    "kWh/s": "kWh",
     "avg": "Average",
     "machineTypeNotif": "Machine Type Custom Settings",
     "weatherSettings": "Weather Settings",
@@ -38,7 +38,7 @@
     "addNew": "+ Add New",
     "dropDrag": "drag/drop",
     "noAssig": "Not Assigned",
-    "fuelGraphTitle": "Energy Consumption (kWh/s)",
+    "fuelGraphTitle": "Energy Consumption (kWh)",
     "workingGraphTitle": "Working Hours (h)",
     "save": "Save",
     "cancel": "Cancel",

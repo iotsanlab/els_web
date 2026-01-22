@@ -124,18 +124,18 @@ const HomePage: React.FC = () => {
     setCheckedOptions(selected);
   };
 
- // tür bazlı statik idle değerleri
+ // subtype bazlı statik idle değerleri
 const weeklyIdleValues: Record<string, number> = {
-  Telehandler: 1.7,
-  Backhoeloader: 3.2,
-  Excavator: 4.5,
+  AE15: 4.5,
+  EL12: 3.2,
+  VM6: 1.7,
 };
 
-// aylık statik idle değerleri
+// aylık statik idle değerleri (subtype bazlı)
 const monthlyIdleValues: Record<string, number> = {
-  Telehandler: 8.9,
-  Backhoeloader: 16.4,
-  Excavator: 23.9,
+  AE15: 23.9,
+  EL12: 16.4,
+  VM6: 8.9,
 };
 
 useEffect(() => {
@@ -220,12 +220,12 @@ useEffect(() => {
     workingTime: calculateWorkingPercentage(totalWorkingHour, last30idle),
   };
 
-  // Sum Bar fonksiyonları
+  // Sum Bar fonksiyonları (subtype bazlı filtreleme)
   function getFilteredDeviceCount(): number {
     return deviceWorkStore.all.filter(device => {
       // checkedOptions boşsa tüm cihazlar dahil edilir
       if (checkedOptions.length === 0) return true;
-      return checkedOptions.includes(device.type);
+      return checkedOptions.includes(device.subtype);
     }).length;
   }
 
@@ -235,7 +235,7 @@ useEffect(() => {
       .filter(device => {
         // checkedOptions boşsa tüm cihazlar dahil edilir
         if (checkedOptions.length === 0) return true;
-        return checkedOptions.includes(device.type);
+        return checkedOptions.includes(device.subtype);
       })
       .filter(device => {
         const latestStatusValue = deviceWorkStore.getTelemetry(device.id, "stat")?.at(-1)?.value;

@@ -11,7 +11,7 @@ interface SearchAreaProps {
 
 const SearchArea = ({ onSearchChange, onFilterChange }: SearchAreaProps) => {
   const {t} = useTranslation();
-  const checkboxOptions = [ "Backhoeloader","Telehandler", "Excavator"];
+  const checkboxOptions = [ "AE15", "EL12", "VM6"];
   const { isDarkMode } = useDarkMode();
   const [searchText, setSearchText] = useState("");
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);

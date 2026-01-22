@@ -25,6 +25,7 @@ interface Attribute {
 interface MachineProps {
   attributes: Attribute[];
   type: string;
+  subtype: string;
   serialNo: string;
   model: string;
   active: boolean;
@@ -44,6 +45,7 @@ const Vehicles = () => {
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [deviceStats, setDeviceStats] = useState<Record<string, any>>({});
   const [mapKey, setMapKey] = useState(0); // Map'i force refresh için
+  const [searchText, setSearchText] = useState("");
 
   const [timerInterval, setTimerInterval] = useState(1);
   const [isAutoRefresh, setIsAutoRefresh] = useState(true);
@@ -163,17 +165,33 @@ const Vehicles = () => {
     });
 
     setOriginalDeviceData(mappedData);
-    setDeviceData(mappedData);
+    
+    // Mevcut arama ve filtre durumunu koru
+    if (searchText || selectedFilters.length > 0) {
+      const lowerSearch = searchText.toLowerCase();
+      const filtered = mappedData.filter(machine => {
+        const serialNo = String(machine.serialNo ?? '').toLowerCase();
+        const model = String(machine.model ?? '').toLowerCase();
+        const matchesSearch = serialNo.includes(lowerSearch) || model.includes(lowerSearch);
+        const matchesFilter =
+          selectedFilters.length === 0 || selectedFilters.includes(machine.subtype);
+        return matchesSearch && matchesFilter;
+      });
+      setDeviceData(filtered);
+    } else {
+      setDeviceData(mappedData);
+    }
+    
     setIsInitialDataLoaded(true);
-  }, [deviceAttributes.all, deviceStats, parseActiveStatus]);
+  }, [deviceAttributes.all, deviceStats, parseActiveStatus, searchText, selectedFilters, alarms]);
 
   const applyFiltersAndSearch = useCallback((filters: string[], searchText: string) => {
     const lowerSearch = searchText.toLowerCase();
 
     const filtered = originalDeviceData.filter(machine => {
-      const matchesSearch =
-        machine.serialNo.toLowerCase().includes(lowerSearch) ||
-        machine.model.toLowerCase().includes(lowerSearch);
+      const serialNo = String(machine.serialNo ?? '').toLowerCase();
+      const model = String(machine.model ?? '').toLowerCase();
+      const matchesSearch = serialNo.includes(lowerSearch) || model.includes(lowerSearch);
 
       const matchesFilter =
         filters.length === 0 || filters.includes(machine.type);
@@ -183,8 +201,6 @@ const Vehicles = () => {
 
     setDeviceData(filtered);
   }, [originalDeviceData]);
-
-  const [searchText, setSearchText] = useState("");
 
   const handleSearchChange = useCallback((text: string) => {
     setSearchText(text);
@@ -298,7 +314,7 @@ const Vehicles = () => {
                               !isNaN(Number(machine.long));
         
         const matchesFilter = selectedFilters.length === 0 || 
-                             selectedFilters.includes(machine.type);
+                             selectedFilters.includes(machine.subtype);
         
         return hasValidCoords && matchesFilter;
       })

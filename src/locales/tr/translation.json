@@ -1,7 +1,7 @@
 {
   "global": {
     "kWh": "kWh",
-    "kWh/s": "kWh/s",
+    "kWh/s": "kWh",
     "avg": "Ortalama",
     "machineTypeNotif": "Makine Tipi Özel Ayarlar",
     "weatherSettings": "Hava Durumu Ayarları",
@@ -37,7 +37,7 @@
     "addNew": "+ Yeni Ekle",
     "dropDrag": "sürükle/bırak",
     "noAssig": "Atanmamış",
-    "fuelGraphTitle": "Tüketilen Enerji (kWh/s)",
+    "fuelGraphTitle": "Tüketilen Enerji (kWh)",
     "workingGraphTitle": "Çalışma Süresi (sa.)",
     "save": "Kaydet",
     "cancel": "İptal",

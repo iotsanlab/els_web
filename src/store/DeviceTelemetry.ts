@@ -62,7 +62,7 @@ export function findCityByCoordinates(lat: number, lon: number): string {
 }
 
 class DeviceWorkStore {
-  telemetryMap: Map<string, { type: string; telemetry: TelemetryData }> = new Map();
+  telemetryMap: Map<string, { type: string; subtype: string; telemetry: TelemetryData }> = new Map();
 
 
 
@@ -79,6 +79,7 @@ class DeviceWorkStore {
 
     const attributes = deviceAttributes.getAttributesById(deviceId);
     const type: string = attributes?.find((detail: any) => detail.key === "Type")?.value || "Unknown";
+    const subtype: string = attributes?.find((detail: any) => detail.key === "Subtype")?.value || "Unknown";
 
     const existing = this.telemetryMap.get(deviceId);
     const updatedTelemetry = {
@@ -86,7 +87,7 @@ class DeviceWorkStore {
       [telemetryKey]: parsed,
     };
 
-    this.telemetryMap.set(deviceId, { type, telemetry: updatedTelemetry });
+    this.telemetryMap.set(deviceId, { type, subtype, telemetry: updatedTelemetry });
     this.saveToStorage();
   }
 
@@ -112,13 +113,13 @@ class DeviceWorkStore {
   getDailySummary(
     telemetryKey: keyof TelemetryData,
     dayCount: number,
-    allowedTypes: string[] = []
+    allowedSubtypes: string[] = []
   ): number {
     const now = Date.now();
     const fromTime = now - dayCount * 24 * 60 * 60 * 1000;
 
     return Array.from(this.telemetryMap.values())
-      .filter(device => allowedTypes.length === 0 || allowedTypes.includes(device.type))
+      .filter(device => allowedSubtypes.length === 0 || allowedSubtypes.includes(device.subtype))
       .reduce((sum, device) => {
         const telemetry = device.telemetry[telemetryKey] || [];
         return (
@@ -134,7 +135,7 @@ class DeviceWorkStore {
 getDailyFormatted(
   telemetryKey: keyof TelemetryData,
   dayCount: number,
-  allowedTypes: string[] = []
+  allowedSubtypes: string[] = []
 ): FormattedData[] {
   const now = new Date();
   now.setHours(0, 0, 0, 0); // sadece gün bazlı çalışacağımız için saatleri sıfırla
@@ -155,7 +156,7 @@ getDailyFormatted(
 
   // Gerçek verilerle dummy'yi güncelle
   Array.from(this.telemetryMap.values())
-    .filter(device => allowedTypes.length === 0 || allowedTypes.includes(device.type))
+    .filter(device => allowedSubtypes.length === 0 || allowedSubtypes.includes(device.subtype))
     .forEach(device => {
       const telemetry = device.telemetry[telemetryKey] || [];
       telemetry.forEach(({ ts, value }) => {
@@ -180,10 +181,10 @@ getDailyFormatted(
     telemetryKey: keyof TelemetryData,
     from: number,
     to: number,
-    allowedTypes: string[] = []
+    allowedSubtypes: string[] = []
   ): number {
     return Array.from(this.telemetryMap.values())
-      .filter(device => allowedTypes.length === 0 || allowedTypes.includes(device.type))
+      .filter(device => allowedSubtypes.length === 0 || allowedSubtypes.includes(device.subtype))
       .reduce((sum, device) => {
         const telemetry = device.telemetry[telemetryKey] || [];
         return (
@@ -216,10 +217,11 @@ getDailyFormatted(
 };
 
 
-  get all(): { id: string; type: string; telemetry: TelemetryData }[] {
+  get all(): { id: string; type: string; subtype: string; telemetry: TelemetryData }[] {
     return Array.from(this.telemetryMap.entries()).map(([id, value]) => ({
       id,
       type: value.type,
+      subtype: value.subtype,
       telemetry: value.telemetry,
     }));
   }
@@ -242,8 +244,10 @@ getDailyFormatted(
     try {
       const stored = localStorage.getItem('deviceTelemetry');
       if (stored) {
-        const data = JSON.parse(stored) as [string, { type: string; telemetry: TelemetryData }][];
-        this.telemetryMap = new Map(data);
+        const data = JSON.parse(stored) as [string, { type: string; subtype?: string; telemetry: TelemetryData }][];
+        // Eski veri formatını desteklemek için subtype yoksa boş string ata
+        const migratedData = data.map(([id, value]) => [id, { ...value, subtype: value.subtype || '' }] as [string, { type: string; subtype: string; telemetry: TelemetryData }]);
+        this.telemetryMap = new Map(migratedData);
       }
     } catch (error) {
       console.warn('DeviceTelemetry localStorage load failed:', error);
