@@ -15,6 +15,12 @@ import develon from "../../assets/markers/redDevelonExcMarkar.svg";
 import greenEls from "../../assets/markers/greenEls.png";
 import redEls from "../../assets/markers/redEls.png";
 
+import greenAE15 from "../../assets/markers/greenAe15Marker.png";
+import redAE15 from "../../assets/markers/redAe15Marker.png";
+
+import greenEL12 from "../../assets/markers/greenEl12Marker.png";
+import redEl12 from "../../assets/markers/redEl12Marker.png";
+
 
 
 interface MapIconProps {
@@ -41,9 +47,9 @@ const CustomMapMarker: React.ComponentType<MapIconProps> = ({type, state}) => {
             {type === "service" && <img style={imageStyle} width={65} height={'auto'} src={serviceMarker} alt="serviceMarker" />}
             {type === "Develon" && <img style={imageStyle} src={state == true ? greenDevelon : develon} alt="develon" />}
             {type === "Lift" && <img style={imageStyle} src={state == true ? greenEls : redEls} alt="markerTele" />}
-            {type === "AE15" && <img style={imageStyle} src={state == true ? greenEls : redEls} alt="markerTele" />}
-            {type === "EL12" && <img style={imageStyle} src={state == true ? greenEls : redEls} alt="markerTele" />}
-            {type === "VM6" && <img style={imageStyle} src={state == true ? greenEls : redEls} alt="markerTele" />}
+        
+            {type === "AE15" && <img style={imageStyle} src={state == true ? greenAE15 : redAE15} alt="markerTele" />}
+            {type === "EL12" && <img style={imageStyle} src={state == true ? greenEL12 : redEl12} alt="markerTele" />}
         </div>
     )
 }

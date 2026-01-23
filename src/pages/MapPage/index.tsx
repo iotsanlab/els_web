@@ -813,6 +813,7 @@ const MapPage = () => {
                   title={infoMenu.title}
                   totalHours={totalHours}
                   operator={infoMenu.operator}
+                  subtype={infoMenu.type}
                   lock={infoMenu.lock}
                   avgFuel={avgFuel}
                   instantFuel={instantFuel}

@@ -200,6 +200,9 @@ const InfoMenu = ({
   };
 
 
+  console.log(subtype, 'subtypeInfoMenu', type);
+
+
 
   return (
     <div
