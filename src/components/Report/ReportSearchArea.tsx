@@ -29,7 +29,7 @@ const ReportSearch = ({ onSelect, onAddReport, onDelete }: ReportSearchProps) =>
   const {t} = useTranslation();
 
 
-  const checkboxOptions = ["Backhoeloader","Telehandler", "Excavator"];
+  const checkboxOptions = ["AE15", "EL12", "VM6"];
 
   const { isDarkMode } = useDarkMode();
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);

@@ -56,7 +56,7 @@
     "avgFuelTitle": "Total Fuel Consumption Graph",
     "avgFuel": "Average Fuel Consumption",
     "schema1": "Working Time Report ",
-    "schema2": "Fuel Consumption Report ",
+    "schema2": "Energy Consumption Report ",
     "selectDate": "Select Date",
     "lt": "L",
     "h": "h",
@@ -456,7 +456,7 @@
     "creatingPDF": "Creating PDF...",
     "totalWorkingTime": "Total Working Hours",
     "workingGraph": "Working Graph",
-    "fuelGraph": "Yakıt Tüketimi Grafiği",
+    "fuelGraph": "Tüketilen Enerji Grafiği",
 
     "machineName": "Machine Name",
     "serialNumber": "Serial Number",
