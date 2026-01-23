@@ -870,57 +870,7 @@ const SettingsPage = () => {
                         )}
                     </div>
 
-                    {/* Makine Tipi Özel Ayarlar */}
-                    <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-                        <h4 className="text-md font-semibold text-gray-900 dark:text-white mb-4">
-                            {t("global.machineTypeNotif")}
-                        </h4>
-                        
-                        {/* Telehandler Ayarları */}
-                        <div className="mb-6">
-                            <div className="flex items-center gap-2 mb-4">
-                                <img
-                                    className="w-[28px] h-[28px]"
-                                    src={renderServiceImage("Telehandler")}
-                                    alt="Telehandler"
-                                />
-                                <h5 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                                    Telehandler {t("notifPage.title2")}
-                                </h5>
-                            </div>
-                            
-                            <div className="pl-10 space-y-4">
-                                {/* Hız Limiti Loglama */}
-                                <div className="flex items-center justify-between w-full py-2">
-                                    <div className="flex flex-col max-w-[500px]">
-                                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            {t("notifPage.teleToggle1")}
-                                        </p>
-                                    </div>
-                                    <SwitchUI
-                                        isChecked={machineSpecificSettings.telehandler.speedLimitLogging}
-                                        onChange={(val) => handleMachineSpecificToggleChange('telehandler', 'speedLimitLogging', val)}
-                                        disabled={isNotificationLoading}
-                                    />
-                                </div>
-
-                                {/* Bypass Tuş Sayısı Loglama */}
-                                <div className="flex items-center justify-between w-full py-2">
-                                    <div className="flex flex-col max-w-[500px]">
-                                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            {t("notifPage.teleToggle2")}
-                                        </p>
-                                    </div>
-                                    <SwitchUI
-                                        isChecked={machineSpecificSettings.telehandler.bypassCountLogging}
-                                        onChange={(val) => handleMachineSpecificToggleChange('telehandler', 'bypassCountLogging', val)}
-                                        disabled={isNotificationLoading}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
+                  
 
                     {/* Diğer Ayarlar */}
                     <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 mt-6">
