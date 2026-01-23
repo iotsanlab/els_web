@@ -26,7 +26,7 @@ type Telemetry = { ts: number; value: number };
 
 type TelemetryData = {
   DailyWorkingHours?: Telemetry[];
-  DailyFuelCons?: Telemetry[];
+  DailyEnergyConsumption?: Telemetry[];
   idleTime?: Telemetry[];
   ECOHOURDaily?: Telemetry[];
   standart?: Telemetry[];
@@ -126,7 +126,7 @@ const VehicleDetail = () => {
     if (!id) return;
 
     const selectedMac = machineList.find(([machineId]) => machineId === id);
-
+   
     if (selectedMac) {
       setVehicle(selectedMac); // bu, [id, attributes[]] olacak
       setVehicleID(id);
@@ -186,7 +186,7 @@ const VehicleDetail = () => {
       active: deviceWorkStore.getTelemetry(deviceId, "stat").at(-1)?.value,
       warnings: [[]],
       instantFuel: deviceWorkStore.getTelemetry(deviceId, "EngFuelRate").at(-1)?.value,
-      totalWorkingHours: deviceWorkStore.getTelemetry(deviceId, "EngineTotalHours").at(-1)?.value,
+      totalWorkingHours: deviceWorkStore.getTelemetry(deviceId, "WorkingHours").at(-1)?.value,
       totalUsedFuel: deviceWorkStore.getTelemetry(deviceId, "EngTotalFuelUsed").at(-1)?.value,
       remaining_for_service: getAttr("remainingHoursToMaintenance").toString(),
       location: deviceWorkStore.getCity(deviceId),
@@ -225,8 +225,8 @@ const VehicleDetail = () => {
       const from = now - 7 * MS_PER_DAY;
       const beforeFrom = now - 14 * MS_PER_DAY;
 
-      const fuel = sum("DailyFuelCons", from, now);
-      const prevFuel = sum("DailyFuelCons", beforeFrom, from);
+      const fuel = sum("DailyEnergyConsumption", from, now);
+      const prevFuel = sum("DailyEnergyConsumption", beforeFrom, from);
 
       const work = sum("DailyWorkingHours", from, now);
       const prevWork = sum("DailyWorkingHours", beforeFrom, from);
@@ -333,9 +333,12 @@ const VehicleDetail = () => {
   const fetchData = async () => {
     try {
       setParameterLoading(true);
+      
 
       // Develon subtype kontrolü ile parametre listesini al
       const allParamKeys = getParameterKeys(vehicle.type, vehicle.subtype);
+
+      console.log("allParamKeys", allParamKeys);
 
       if (allParamKeys.length === 0) {
         console.warn("Parametre listesi bulunamadı:", vehicle.type, vehicle.subtype);
@@ -348,14 +351,8 @@ const VehicleDetail = () => {
 
       // Default parametreler
       const DEFAULT_PARAMETERS = [
-        "EngineTotalHours",
-        "EngTotalFuelUsed",
-        "AkuGerilimi",
-        "Ext Voltage",
-        "EngCoolTemp",
-        "EngineCoolantTemp",
-        "AmbAirTemp",
-        "RPM",
+        "WorkingHours",
+        "Height",
       ];
 
       // Kullanıcının kayıtlı seçimini al veya default kullan
@@ -416,14 +413,8 @@ const VehicleDetail = () => {
 
         // Default parametreler
         const DEFAULT_PARAMETERS = [
-          "EngineTotalHours",
-          "EngTotalFuelUsed",
-          "AkuGerilimi",
-          "Ext Voltage",
-          "EngCoolTemp",
-          "EngineCoolantTemp",
-          "AmbAirTemp",
-          "RPM",
+          "WorkingHours",
+          "Height"
         ];
 
         let selectedFromStore: string[] = [];
@@ -769,7 +760,7 @@ const VehicleDetail = () => {
               <div className="mt-4 w-full h-[30%] flex items-center justify-start">
                 <div className="h-full w-[20%] bg-white dark:bg-gray10 flex items-start justify-center">
                   {" "}
-                  <SvgIcons iconName="FuelLarge" fill="#5D6974" />{" "}
+                  <SvgIcons iconName="Energy" className="size-20" fill="#5D6974" />{" "}
                 </div>
                 <div className="h-full w-[80%] bg-white dark:bg-gray10 flex flex-col items-start justify-start">
                   <p className="text-base font-medium leading-normal tracking-wide text-gray4 font-inter">
@@ -777,7 +768,7 @@ const VehicleDetail = () => {
                   </p>
                   <div className="flex items-center justift-start">
                     <p className="text-3xl font-bold leading-normal tracking-wide text-gray8 font-inter">
-                      {totalFuelConsumption} Lt.
+                      {totalFuelConsumption} kWh
                     </p>
                     {totalFuelConsumption < beforeTotalFuelConsumption ? (
                       <SvgIcons iconName="DownRate" fill="#5EB044" />
@@ -794,24 +785,6 @@ const VehicleDetail = () => {
                 </div>
               </div>
 
-              <div className="mt-4 w-full h-[30%] flex items-center justify-start">
-                <div className="h-full w-[20%] bg-white dark:bg-gray10 flex items-start justify-center">
-                  {" "}
-                  <SvgIcons iconName="Def" fill="#5D6974" />{" "}
-                </div>
-                <div className="h-full w-[80%] bg-white dark:bg-gray10 flex flex-col items-start justify-start">
-                  <p className="text-base font-medium leading-normal tracking-wide text-gray4 font-inter">
-                    {t("machineInfoPage.usageCard.def")}
-                  </p>
-                  <div className="flex items-center justift-start">
-                    <p className="text-3xl font-bold leading-normal tracking-wide text-gray8 font-inter">
-                      {vehicle.def >= 0 ? vehicle.def?.toFixed(2) + "%" : "-"}
-                    </p>
-
-                  </div>
-
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -824,7 +797,7 @@ const VehicleDetail = () => {
         selectedItemsList={selectedItems}
         onItemsChange={handleSelectedItemsChange}
         onSave={handleTransferSave}
-        machineType={vehicle?.subtype ? vehicle?.subtype : vehicle?.type}
+        machineType={(vehicle?.subtype === "USA" || vehicle?.subtype === "Develon") ? vehicle?.subtype : vehicle?.type}
         subtype={vehicle?.subtype}
       />
 

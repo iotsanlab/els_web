@@ -40,7 +40,7 @@ const StatisticsSwiper: React.FC<StatisticsSwiperProps> = ({ deviceId, machineTy
   const now = Date.now();
 const fromTime = now - (dayCount - 1) * 24 * 60 * 60 * 1000;
 
-  const fuel = deviceWorkStore.getTelemetry(deviceId, "DailyFuelCons")
+  const fuel = deviceWorkStore.getTelemetry(deviceId, "DailyEnergyConsumption")
     .filter(entry => entry.ts >= fromTime);
 
   const dateMap: Record<string, number> = {};
@@ -199,8 +199,7 @@ const generateSeries = (
   let series = [];
 
   series = [
-    generateSeries(t("machineInfoPage.summaryWidget.labels.std"), rawData.total, "#FFD335", 0),
-    generateSeries(t("global.idling"), rawData.idle, "#B9C2CA", 0),
+    generateSeries(t("machineInfoPage.summaryWidget.labels.std"), rawData.total, "#FFD335", 0)
   ];
 
 

@@ -664,7 +664,7 @@ const MapPage = () => {
     .getTelemetry(selectedMachineId, "EngTotalFuelUsed")
     .at(-1)?.value;
   const engHours = deviceWorkStore
-    .getTelemetry(selectedMachineId, "EngineTotalHours")
+    .getTelemetry(selectedMachineId, "WorkingHours")
     .at(-1)?.value;
 
   const avgFuel =

@@ -171,8 +171,8 @@ useEffect(() => {
     return found ? found : d;
   });
   setWorkingBarChartMonthly(completed);
-  setFuelBarChartWeekly(deviceWorkStore.getDailyFormatted("DailyFuelCons", 7, optionsToUse));
-  setFuelBarChartMonthly(deviceWorkStore.getDailyFormatted("DailyFuelCons", 30, optionsToUse));
+  setFuelBarChartWeekly(deviceWorkStore.getDailyFormatted("DailyEnergyConsumption", 7, optionsToUse));
+  setFuelBarChartMonthly(deviceWorkStore.getDailyFormatted("DailyEnergyConsumption", 30, optionsToUse));
 }, [checkedOptions, deviceWorkStore.all.length, refreshTrigger]);
 
 

@@ -2125,6 +2125,96 @@ const machineParametersByType: Record<string, MachineParameter[]> = {
       maxValue: 30,
       minValue: 0
     },
+  ],
+
+  Lift: [
+    {
+      type: "empty",
+      lang_key: "parameterName.lift.BatteryLevel",
+      parameter: "BatteryLevel",
+      chartType: "linear",
+      title: "parameterName.lift.BatteryLevel",
+      valueTitle: "%",
+      maxValue: 100,
+      minValue: 0
+    },
+
+    {
+      type: "empty",
+      lang_key: "parameterName.lift.WorkingHours",
+      parameter: "WorkingHours",
+      chartType: "empty",
+      title: "parameterName.lift.WorkingHours",
+      valueTitle: "global.hour",
+      maxValue: 1000,
+      minValue: 0
+    },
+
+    {
+      type: "empty",
+      lang_key: "parameterName.lift.PlatformMODE",
+      parameter: "PlatformMODE",
+      chartType: "empty",
+      title: "parameterName.lift.PlatformMODE",
+      valueTitle: "",
+      maxValue: 1000,
+      minValue: 0
+    },
+
+    {
+      type: "empty",
+      lang_key: "parameterName.lift.FlashCode",
+      parameter: "FlashCode",
+      chartType: "empty",
+      title: "parameterName.lift.FlashCode",
+      valueTitle: "",
+      maxValue: 1000,
+      minValue: 0
+    },
+
+    {
+      type: "empty",
+      lang_key: "parameterName.lift.Height",
+      parameter: "Height",
+      chartType: "linear",
+      title: "parameterName.lift.Height",
+      valueTitle: "%",
+      maxValue: 100,
+      minValue: 0
+    },
+
+    {
+      type: "empty",
+      lang_key: "parameterName.lift.Load",
+      parameter: "Load",
+      chartType: "linear",
+      title: "parameterName.lift.Load",
+      valueTitle: "%",
+      maxValue: 100,
+      minValue: 0
+    },
+
+    {
+      type: "empty",
+      lang_key: "parameterName.lift.TILTX",
+      parameter: "TILTX",
+      chartType: "radial",
+      title: "parameterName.lift.TILTX",
+      valueTitle: "",
+      maxValue: 100,
+      minValue: -100
+    },
+
+    {
+      type: "empty",
+      lang_key: "parameterName.lift.TILTY",
+      parameter: "TILTY",
+      chartType: "radial",
+      title: "parameterName.lift.TILTY",
+      valueTitle: "",
+      maxValue: 100,
+      minValue: -100
+    },
   ]
 };
 

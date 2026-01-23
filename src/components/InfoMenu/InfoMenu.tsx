@@ -325,11 +325,15 @@ const InfoMenu = ({
 
         <div style={{ height: 20 }} />
 
-        <Title title={t("machineInfoPage.infoCard.fuel")} />
+       {
+        /*
+         <Title title={t("machineInfoPage.infoCard.fuel")} />
         <InfoBar
           title={t("machineInfoPage.infoCard.averageFuel")}
           desc={avgFuel}
         />
+        */
+       }
        
 
         <div className={`${warningClassName ? "mt-0" : "mt-[50px]"}`}>

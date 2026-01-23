@@ -264,7 +264,7 @@
       }
     },
     "summaryWidget": {
-      "fuel": "Yakıt Tüketimi",
+      "fuel": "Tüketilen Enerji",
       "workTime": "Çalışma Süresi",
       "days": ["Pt", "Sa", "Ça", "Pe", "Cu", "Ct", "Pa"],
       "time": "Haftalık",
@@ -338,12 +338,12 @@
       "usage": "Kullanım"
     },
     "chart": {
-      "fuel": "Yakıt Tüketimi (Lt)",
+      "fuel": "Tüketilen Enerji (kWh)",
       "def": "Çalışma Süresi (sa)"
     },
     "usageCard": {
       "work": "Çalışma Süresi",
-      "fuel": "Yakıt Tüketimi",
+      "fuel": "Tüketilen Enerji",
       "def": "AdBlue Seviyesi",
       "before": "{{time}} önceki"
     },
@@ -719,6 +719,16 @@
       "last7FuelCons": "Son 7 Gün Yakıt Tüketimi",
       "DailyWorkingHours": "Günlük Çalışma Saati",
       "DailyFuelCons": "Günlük Yakıt Tüketimi"
+    },
+    "lift": {
+      "BatteryLevel": "Batarya Seviyesi",
+      "WorkingHours": "Çalışma Saati",
+      "PlatformMODE": "Platform Modu",
+      "FlashCode": "Flash Kodu",
+      "Height": "Yükseklik",
+      "Load": "Yük",
+      "TILTX": "TILTX",
+      "TILTY": "TILTY"
     }
   },
   "resetPassModal": {

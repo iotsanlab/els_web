@@ -131,7 +131,7 @@ const ManualBarChart = ({ sampleDataWeekly, sampleDataMonthly, title, type, onSe
                                 {/* Tooltip: Hover edilince gösterilecek */}
                                 {hoveredBar === index && (
                                     <div className={`absolute z-[9999] w-[60px] h-[30px] ${index == data.length - 1 ? "right-[0px]" : ""} ${data.length > 7 ? (index > 2 ? "right-[0px]" : "") : ''} items-center justify-center bg-gray2 text-gray10 text-xs rounded-[10px]`}>
-                                        <p className='flex items-center justify-center w-full h-full'>{`${item.value.toFixed(1)} ${type == "blue" ? t("global.lt") : t("global.h")}`}</p>
+                                        <p className='flex items-center justify-center w-full h-full'>{`${item.value.toFixed(1)} ${type == "blue" ? t("global.kWh") : t("global.h")}`}</p>
                                     </div>
                                 )}
                             </div>

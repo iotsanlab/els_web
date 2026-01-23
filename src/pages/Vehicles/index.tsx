@@ -108,8 +108,8 @@ const Vehicles = () => {
   const totalWorking7Days = deviceWorkStore.getSummaryBetweenDates("DailyWorkingHours", from7, now, allowedTypes);
   const oldWorking7Days = deviceWorkStore.getSummaryBetweenDates("DailyWorkingHours", from14, from7, allowedTypes);
 
-  const totalFuel7Days = deviceWorkStore.getSummaryBetweenDates("DailyFuelCons", from7, now, allowedTypes);
-  const oldFuel7Days = deviceWorkStore.getSummaryBetweenDates("DailyFuelCons", from14, from7, allowedTypes);
+  const totalFuel7Days = deviceWorkStore.getSummaryBetweenDates("DailyEnergyConsumption", from7, now, allowedTypes);
+  const oldFuel7Days = deviceWorkStore.getSummaryBetweenDates("DailyEnergyConsumption", from14, from7, allowedTypes);
 
   const totalIdle7Days = deviceWorkStore.getSummaryBetweenDates("idleTime", from7, now, allowedTypes);
   const oldIdle7Days = deviceWorkStore.getSummaryBetweenDates("idleTime", from14, from7, allowedTypes);
@@ -154,7 +154,7 @@ const Vehicles = () => {
         active: isActive,
         warnings: warningCount,
         fuel_level: deviceWorkStore.getTelemetry(id, "FuelLevel").at(-1)?.value?.toString() ?? "",
-        totalWorkingHours: deviceWorkStore.getTelemetry(id, "EngineTotalHours").at(-1)?.value ?? "",
+        totalWorkingHours: deviceWorkStore.getTelemetry(id, "WorkingHours").at(-1)?.value ?? "",
         remaining_for_service: getAttr("remainingHoursToMaintenance").toString(),
         location: deviceWorkStore.getCity(id),
         id: id,
@@ -164,7 +164,7 @@ const Vehicles = () => {
       };
     });
 
-    setOriginalDeviceData(mappedData);
+    setOriginalDeviceData(mappedData.sort((a, b) => b.model.localeCompare(a.model)));
     
     // Mevcut arama ve filtre durumunu koru
     if (searchText || selectedFilters.length > 0) {

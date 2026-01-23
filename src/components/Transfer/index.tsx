@@ -31,10 +31,15 @@ const Transfer = ({
   const [selectedItems, setSelectedItems] = useState<Item[]>([]);
 
 useEffect(() => {
-  // Develon subtype kontrolü ile doğru parametre listesini al
-  const parameters = subtype === "Develon" 
-    ? (machineParametersByType["Develon"] || [])
-    : (machineParametersByType[machineType] || []);
+  // Subtype kontrolü ile doğru parametre listesini al (USA ve Develon için özel durum)
+  let parameters: MachineParameter[] = [];
+  if (subtype === "Develon") {
+    parameters = machineParametersByType["Develon"] || [];
+  } else if (subtype === "USA") {
+    parameters = machineParametersByType["USA"] || [];
+  } else {
+    parameters = machineParametersByType[machineType] || [];
+  }
 
   const availableItems = availableItemsList.map((parameter: string) => {
     const machineParameter = parameters.find((p: MachineParameter) => p.parameter === parameter);

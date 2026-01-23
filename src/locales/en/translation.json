@@ -266,7 +266,7 @@
       }
     },
     "summaryWidget": {
-      "fuel": "Fuel Consumption",
+      "fuel": "Energy Consumption",
       "workTime": "Working Hours",
       "days": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
       "time": "Weekly",
@@ -340,12 +340,12 @@
       "usage": "Usage"
     },
     "chart": {
-      "fuel": "Fuel Consumption (L)",
+      "fuel": "Energy Consumption (kWh)",
       "def": "Working Hours (h)"
     },
     "usageCard": {
       "work": "Working Hours",
-      "fuel": "Fuel Consumption",
+      "fuel": "Energy Consumption",
       "def": "AdBlue Level",
       "before": "{{time}} in previous"
     },
@@ -722,6 +722,16 @@
       "last7FuelCons": "Last 7 Days Fuel Consumption",
       "DailyWorkingHours": "Daily Working Hours",
       "DailyFuelCons": "Daily Fuel Consumption"
+    },
+    "lift": {
+      "BatteryLevel": "Battery Level",
+      "WorkingHours": "Working Hours",
+      "PlatformMODE": "Platform MODE",
+      "FlashCode": "Flash Code",
+      "Height": "Height",
+      "Load": "Load",
+      "TILTX": "TILTX",
+      "TILTY": "TILTY"
     }
   },
   "resetPassModal": {

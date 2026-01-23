@@ -16,10 +16,10 @@ import { userStore } from '../store/UserStore';
 const BATCH_SIZE = 500;
 
 const TELEMETRY_KEYS = {
-  daily: ['DailyWorkingHours', 'DailyFuelCons', 'idleTime', 'ECOHOUR1Daily', 'STDHOUR1Daily', 'PWRHOUR1Daily', 'PWR_PLUSHOUR1Daily', 'DailyIdleHours', 'last30IdleHours', 'last60IdleHours', 'last14IdleHours', 'last7IdleHours'],
-  status: ['stat', 'latitude', 'longitude', 'FuelLevel', 'EngFuelRate', 'EngineTotalHours', 'EngTotalFuelUsed', 'UreaTankLevel', 'ADBlue'],
+  daily: ['DailyWorkingHours', 'DailyFuelCons', 'idleTime', 'ECOHOUR1Daily', 'STDHOUR1Daily', 'PWRHOUR1Daily', 'PWR_PLUSHOUR1Daily', 'DailyIdleHours', 'last30IdleHours', 'last60IdleHours', 'last14IdleHours', 'last7IdleHours', 'DailyEnergyConsumption'],
+  status: ['stat', 'latitude', 'longitude', 'FuelLevel', 'EngFuelRate', 'WorkingHours', 'EngTotalFuelUsed', 'UreaTankLevel', 'ADBlue', 'TotalEnergyConsumption'],
   warnings: ['src', 'spn', 'fmi', 'hrs', 'ts'],
-};
+};  
 
 function getUtcDateRange() {
   const now = new Date();
@@ -71,7 +71,7 @@ function updateMachineStore(id: string, attrMap: Map<string, any>) {
     subtype: attrMap.get('Subtype') || '',
     serialNo: attrMap.get('SeriNo') || '',
     user_fullname: attrMap.get('opName') || '',
-    totalWorkingHours: Number(deviceWorkStore.getTelemetry(id, 'EngineTotalHours').at(-1)?.value) || 0,
+    totalWorkingHours: Number(deviceWorkStore.getTelemetry(id, 'WorkingHours').at(-1)?.value) || 0,
     instantFuel: Number(deviceWorkStore.getTelemetry(id, 'EngFuelRate').at(-1)?.value) || 0,
     totalUsedFuel: Number(deviceWorkStore.getTelemetry(id, 'EngTotalFuelUsed').at(-1)?.value) || 0,
     state: deviceWorkStore.getTelemetry(id, 'stat')?.at(-1)?.value,

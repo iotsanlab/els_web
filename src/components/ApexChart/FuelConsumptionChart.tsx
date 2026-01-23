@@ -68,7 +68,7 @@ const FuelConsumptionChart: React.FC<FuelConsumptionData> = ({
 
           return `<ul class="list-none p-1 bg-white dark:bg-gray10 dark:text-white rounded-md border-none">
       <li><b>${name}</b>: ${data.actualValue} ${
-        isTooltipText ? isFuel == true ? t("global.lt") : t("global.h") : ""
+        isTooltipText ? isFuel == true ? t("global.kWh") : t("global.h") : ""
       } </li>
     </ul>`;
         }
