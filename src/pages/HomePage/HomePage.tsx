@@ -142,8 +142,8 @@ useEffect(() => {
   const optionsToUse = checkedOptions.length > 0 ? checkedOptions : Object.keys(weeklyIdleValues);
 
 
-  const total30 = deviceWorkStore.getDailyFormatted("DailyWorkingHours", 31, optionsToUse)
-  const total7 = deviceWorkStore.getDailyFormatted("DailyWorkingHours", 7, optionsToUse)
+  const total30 = deviceWorkStore.getDailyFormatted("DailyPlatformHours", 31, optionsToUse)
+  const total7 = deviceWorkStore.getDailyFormatted("DailyPlatformHours", 7, optionsToUse)
 
   const total30Working = total30.reduce((acc, item) => acc + item.value, 0);
   const total7Working = total7.reduce((acc, item) => acc + item.value, 0);
@@ -154,12 +154,12 @@ useEffect(() => {
 
 
   // haftalık idle
-  const idleTime = deviceWorkStore.getDailySummary("DailyIdleHours", 7, checkedOptions);
+  const idleTime = deviceWorkStore.getDailySummary("DailyGroundHours", 7, checkedOptions);
   const idle7 = optionsToUse.reduce((acc, type) => acc + (weeklyIdleValues[type] || 0), 0);
   setLast7Idle(idleTime);
 
   // aylık idle
-  const idleTime30 = deviceWorkStore.getDailySummary("DailyIdleHours", 31, checkedOptions);
+  const idleTime30 = deviceWorkStore.getDailySummary("DailyGroundHours", 31, checkedOptions);
   const idle30 = optionsToUse.reduce((acc, type) => acc + (monthlyIdleValues[type] || 0), 0);
   setLast30Idle(idleTime30);
 

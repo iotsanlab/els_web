@@ -16,7 +16,7 @@ import { userStore } from '../store/UserStore';
 const BATCH_SIZE = 500;
 
 const TELEMETRY_KEYS = {
-  daily: ['DailyWorkingHours', 'DailyFuelCons', 'idleTime', 'ECOHOUR1Daily', 'STDHOUR1Daily', 'PWRHOUR1Daily', 'PWR_PLUSHOUR1Daily', 'DailyIdleHours', 'last30IdleHours', 'last60IdleHours', 'last14IdleHours', 'last7IdleHours', 'DailyEnergyConsumption'],
+  daily: ['DailyWorkingHours', 'DailyFuelCons', 'idleTime', 'ECOHOUR1Daily', 'STDHOUR1Daily', 'PWRHOUR1Daily', 'PWR_PLUSHOUR1Daily', 'DailyIdleHours', 'last30IdleHours', 'last60IdleHours', 'last14IdleHours', 'last7IdleHours', 'DailyEnergyConsumption', 'DailyPlatformHours','DailyGroundHours'],
   status: ['stat', 'latitude', 'longitude', 'FuelLevel', 'EngFuelRate', 'WorkingHours', 'EngTotalFuelUsed', 'UreaTankLevel', 'ADBlue', 'TotalEnergyConsumption'],
   warnings: ['src', 'spn', 'fmi', 'hrs', 'ts'],
 };  

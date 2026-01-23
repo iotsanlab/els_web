@@ -352,7 +352,12 @@ const VehicleDetail = () => {
       // Default parametreler
       const DEFAULT_PARAMETERS = [
         "WorkingHours",
-        "Height",
+        "BatteryLevel",
+        "PlatformMODE",
+        "FlashCode",
+        "Load",
+        "TILTX",
+        "TILTY",
       ];
 
       // Kullanıcının kayıtlı seçimini al veya default kullan
@@ -414,7 +419,12 @@ const VehicleDetail = () => {
         // Default parametreler
         const DEFAULT_PARAMETERS = [
           "WorkingHours",
-          "Height"
+          "BatteryLevel",
+          "PlatformMODE",
+          "FlashCode",
+          "Load",
+          "TILTX",
+          "TILTY",
         ];
 
         let selectedFromStore: string[] = [];
@@ -551,7 +561,7 @@ const VehicleDetail = () => {
     return [
       {
         id: vehicle?.id,
-        type: vehicle?.subtype === "Develon" ? "Develon" : vehicle?.type || "",
+        type: vehicle?.subtype,
         name: vehicle?.model,
         latitude: Number(vehicle?.lat),
         longitude: Number(vehicle?.long),
