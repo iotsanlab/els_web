@@ -21,6 +21,7 @@ import { useNotification } from "../../hooks/useNotification";
 import DraggableSensorGrid from './DraggableSensorGrid';
 import { useNavigate } from "react-router-dom";
 import ParameterChartModal from "../../components/ParameterChartModal";
+import machineDetailIcon from '../../assets/images/icon.png';
 
 type Telemetry = { ts: number; value: number };
 
@@ -238,12 +239,13 @@ const VehicleDetail = () => {
     }
 
     if (selectedOption === 1) {
-      const last30working = parseFloat(vehicle.last30EngHours || "0");
-      const last60working = parseFloat(vehicle.last60EngHours || "0");
+      const last30working = vehicle.last30EngHours || "0";
+      const last60working = vehicle.last60EngHours || "0";
       const prevMonthWorking = last60working - last30working;
-
-      setTotalWorkingHours(+last30working.toFixed(1));
-      setBeforeTotalWorkingHours(+prevMonthWorking.toFixed(1));
+      
+      console.log("last30working", vehicle.last30EngHours, vehicle);
+      setTotalWorkingHours(+last30working);
+      setBeforeTotalWorkingHours(+prevMonthWorking);
 
       const last30fuel = parseFloat(vehicle.last30FuelCons || "0");
       const last60fuel = parseFloat(vehicle.last60FuelCons || "0");
@@ -730,7 +732,7 @@ const VehicleDetail = () => {
           <div className="flex flex-col h-full w-[35%] min-w-[440px] min-h-[410px]">
             <GeneralTitle title={t("machineInfoPage.labels.usage")} />
             <div className="bg-white dark:bg-gray10 w-full h-full max-h-[440px] p-4 items-start justify-start flex flex-col rounded-[10px] drop-shadow-[2px_2px_4px_#00000026]">
-              <div className="flex items-center justify-end w-full bg-white dark:bg-gray10">
+              <div className="flex items-center justify-end w-full bg-white dark:bg-gray10 mb-3">
                 <Dropdown
                   options={options}
                   selectedIndex={selectedOption}
@@ -766,6 +768,7 @@ const VehicleDetail = () => {
                   </p>
                 </div>
               </div>
+              
 
               <div className="mt-4 w-full h-[30%] flex items-center justify-start">
                 <div className="h-full w-[20%] bg-white dark:bg-gray10 flex items-start justify-center">
@@ -795,6 +798,24 @@ const VehicleDetail = () => {
                 </div>
               </div>
 
+
+              <div className="mt-4 w-full h-[30%] flex items-center justify-start cursor-pointer">
+                <div className="h-full w-[20%] bg-white dark:bg-gray10 flex items-start justify-center">
+               
+                  <img src={machineDetailIcon} alt="info" className="w-16" />
+                  
+                </div>
+                <div className="h-full w-[80%] bg-white dark:bg-gray10 flex flex-col items-start justify-start">
+                 
+                  <div className="flex items-center justift-start">
+                    <p className="text-3xl font-bold leading-normal tracking-wide text-gray8 font-inter">
+                      Batarya Sağlığı
+                    </p>
+                   
+                  </div>
+                 
+                </div>
+              </div>
             </div>
           </div>
         </div>

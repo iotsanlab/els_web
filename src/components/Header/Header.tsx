@@ -5,13 +5,14 @@ import ProfileDropdown from "../ProfileDropdown";
 import SwitchDarkMode from "../SwitchDarkMode";
 import LanguageDropdown from "../LanguageDropdown";
 import { useDarkMode } from "../../context/DarkModeContext";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import NotificationDropdown from "../NotificationDropdown";
 import { NotificationData } from "../../data/NotificationData";
 import Logo from "../../assets/images/logo.png";
 import DarkLogo from "../../assets/images/logoDark.png";
 import { useNotifications } from "./useNotif";
 import InfoModal from "../HeaderModal/infoModal";
+import machineDetailIcon from '../../assets/images/icon.png'
 
 import testInfoPng from "../../assets/infoModal/test.png";
 import testInfoPng2 from "../../assets/infoModal/test2.png";

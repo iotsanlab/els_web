@@ -16,7 +16,7 @@ import { userStore } from '../store/UserStore';
 const BATCH_SIZE = 500;
 
 const TELEMETRY_KEYS = {
-  daily: ['DailyWorkingHours', 'DailyFuelCons', 'idleTime', 'ECOHOUR1Daily', 'STDHOUR1Daily', 'PWRHOUR1Daily', 'PWR_PLUSHOUR1Daily', 'DailyIdleHours', 'last30IdleHours', 'last60IdleHours', 'last14IdleHours', 'last7IdleHours', 'DailyEnergyConsumption', 'DailyPlatformHours','DailyGroundHours'],
+  daily: ['DailyWorkingHours', 'DailyFuelCons', 'idleTime', 'ECOHOUR1Daily', 'STDHOUR1Daily', 'PWRHOUR1Daily', 'PWR_PLUSHOUR1Daily', 'DailyIdleHours', 'last30EngHours', 'last30FuelCons', 'last60EngHours', 'last60FuelCons', 'last14IdleHours', 'last7IdleHours', 'DailyEnergyConsumption', 'DailyPlatformHours','DailyGroundHours'],
   status: ['stat', 'latitude', 'longitude', 'FuelLevel', 'EngFuelRate', 'WorkingHours', 'EngTotalFuelUsed', 'UreaTankLevel', 'ADBlue', 'TotalEnergyConsumption'],
   warnings: ['src', 'spn', 'fmi', 'hrs', 'ts'],
 };  
@@ -25,7 +25,7 @@ function getUtcDateRange() {
   const now = new Date();
   const startOfTodayUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
   return {
-    startDate: startOfTodayUTC - 30 * 24 * 60 * 60 * 1000,
+    startDate: startOfTodayUTC - 60 * 24 * 60 * 60 * 1000, // 60 days back for last60EngHours/last60FuelCons
     endDate: startOfTodayUTC + 24 * 60 * 60 * 1000 - 1,
   };
 }
