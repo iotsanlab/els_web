@@ -194,7 +194,7 @@ const Render: React.FC<Props> = ({
             <Trans
              i18nKey={displayValue?.toString() || "0"}
               values={{ value: displayValue?.toString() || "0" }}
-              components={{ 0: <span className="text-red-500" /> }}
+              components={[<span key="0" className="text-[36px]" />]}
             /> 
           </p>
           <p className="text-[16px] font-bold leading-normal tracking-wide text-gray10 dark:text-white  ">

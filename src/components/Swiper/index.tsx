@@ -15,6 +15,8 @@ const StatisticsSwiper: React.FC<StatisticsSwiperProps> = ({ deviceId, machineTy
 
   const [fuelDropdown, setFuelDropdown] = useState<number>(0);
   const [workingTimeDropdown, setWorkingTimeDropdown] = useState<number>(0);
+  const [showFuelAverageLine, setShowFuelAverageLine] = useState<boolean>(true);
+  const [showWorkingAverageLine, setShowWorkingAverageLine] = useState<boolean>(true);
 
   const [fuelSeries, setFuelSeries] = useState<any[]>([]);
   const [fuelDays, setFuelDays] = useState<string[]>([]);
@@ -238,6 +240,9 @@ const generateSeries = (
           series={fuelSeries}
           days={fuelDays}
           isFuel={true}
+          showAverageLine={showFuelAverageLine}
+          averageValue={7}
+          onToggleAverageLine={setShowFuelAverageLine}
         />
 
       </div>

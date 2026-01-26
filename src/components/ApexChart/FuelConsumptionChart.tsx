@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 interface FuelConsumptionData {
   series: {
     name: string;
-    data: number[];
+    data: (number | { x?: string; y: number; fillColor?: string; actualValue?: number })[];
     color?: string;
   }[];
   days: string[];
@@ -16,6 +16,9 @@ interface FuelConsumptionData {
   isFuel?: boolean;
   isLegend?: boolean;
   isTooltipText?: boolean;
+  showAverageLine?: boolean;
+  averageValue?: number;
+  onToggleAverageLine?: (value: boolean) => void;
 }
 
 const FuelConsumptionChart: React.FC<FuelConsumptionData> = ({
@@ -24,7 +27,10 @@ const FuelConsumptionChart: React.FC<FuelConsumptionData> = ({
   isEmpty,
   isFuel,
   isLegend = true,
-  isTooltipText = true
+  isTooltipText = true,
+  showAverageLine = false,
+  averageValue = 7,
+  onToggleAverageLine
 }) => {
   const { isDarkMode } = useDarkMode();
   const { t } = useTranslation();
@@ -121,13 +127,13 @@ const FuelConsumptionChart: React.FC<FuelConsumptionData> = ({
             hideOverflowingLabels: true,
             total: {
               enabled: true,
-              formatter: function (val, { seriesIndex, dataPointIndex, w }) {
+              formatter: function (val, { seriesIndex, dataPointIndex, w }): string {
                 const data = w.globals.initialSeries[seriesIndex].data[dataPointIndex];
 
                 // actualValue 0 ise yazı göstermiyoruz
                 if (data?.actualValue === 0) return "";
 
-                return val;
+                return val?.toString() ?? "";
               }, style: {
                 fontSize: "12px",
                 fontWeight: "bold",
@@ -184,7 +190,7 @@ const FuelConsumptionChart: React.FC<FuelConsumptionData> = ({
         position: "bottom",
         offsetX: 10,
         offsetY: 10,
-        show: isLegend,
+        show: false, // Custom legend kullanacağız
         showForSingleSeries: true,
         horizontalAlign: "left",
         fontWeight: "bold",
@@ -194,6 +200,27 @@ const FuelConsumptionChart: React.FC<FuelConsumptionData> = ({
       },
       fill: {
         opacity: 1,
+      },
+      annotations: {
+        yaxis: showAverageLine ? [{
+          y: averageValue,
+          borderColor: '#EF4444',
+          borderWidth: 2,
+          strokeDashArray: 5,
+          label: {
+            borderColor: '#EF4444',
+            style: {
+              color: '#fff',
+              background: '#EF4444',
+              fontSize: '11px',
+              fontWeight: 'bold',
+            },
+            text: `İdeal: ${averageValue}`,
+            position: 'left',
+            offsetX: 40,
+            offsetY: 0,
+          }
+        }] : []
       },
     },
   });
@@ -248,60 +275,33 @@ useEffect(() => {
             }
           }
         }
+      },
+      annotations: {
+        yaxis: showAverageLine ? [{
+          y: averageValue,
+          borderColor: '#EF4444',
+          borderWidth: 2,
+          strokeDashArray: 5,
+          label: {
+            borderColor: '#EF4444',
+            style: {
+              color: '#fff',
+              background: '#EF4444',
+              fontSize: '11px',
+              fontWeight: 'bold',
+            },
+            text: `İdeal: ${averageValue}`,
+            position: 'left',
+            offsetX: 40,
+            offsetY: 0,
+          }
+        }] : []
       }
     }
   }));
-}, [series, days, isDarkMode]);
+}, [series, days, isDarkMode, showAverageLine, averageValue]);
 
 
-  // Props değiştiğinde state'i güncelle
-  useEffect(() => {
-    setState(prevState => ({
-      ...prevState,
-      series: series,
-      options: {
-        ...prevState.options,
-        grid: {
-          ...prevState.options.grid,
-          borderColor: isDarkMode ? '#5D6974' : '#f8f8f8',
-        },
-        xaxis: {
-          ...prevState.options.xaxis,
-          categories: days,
-          labels: {
-            ...prevState.options.xaxis?.labels,
-            style: {
-              ...prevState.options.xaxis?.labels?.style,
-              fontSize: days.length > 10 ? "8px" : "10px"
-            }
-          }
-        },
-        legend: {
-          ...prevState.options.legend,
-          labels: {
-            colors: isDarkMode ? '#B9C2CA' : '#5D6974',
-          }
-        },
-        plotOptions: {
-          ...prevState.options.plotOptions,
-          bar: {
-            ...prevState.options.plotOptions?.bar,
-            dataLabels: {
-              ...prevState.options.plotOptions?.bar?.dataLabels,
-              total: {
-                ...prevState.options.plotOptions?.bar?.dataLabels?.total,
-                enabled: series.length === 1,
-                style: {
-                  ...prevState.options.plotOptions?.bar?.dataLabels?.total?.style,
-                }
-              }
-            }
-          }
-        }
-      }
-    }));
-
-  }, [series, days, isDarkMode]);
 
   // Mouse event handlers for dragging functionality
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -366,22 +366,63 @@ useEffect(() => {
           </span>
         </div>
       ) : (
-        <div
-          ref={chartContainerRef}
-          className="w-full h-full overflow-x-auto"
-          style={{ cursor: "grab" }}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseLeave}
-        >
-          <ReactApexChart
-            series={state.series}
-            options={state.options}
-            type="bar"
-            width={days.length > 10 ? 1200 : undefined}
-            height={300}
-          />
+        <div className="flex flex-col">
+          <div
+            ref={chartContainerRef}
+            className="w-full h-full overflow-x-auto"
+            style={{ cursor: "grab" }}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseLeave}
+          >
+            <ReactApexChart
+              series={state.series as any}
+              options={state.options}
+              type="bar"
+              width={days.length > 10 ? 1200 : undefined}
+              height={300}
+            />
+          </div>
+          {/* Custom Legend - Series + İdeal Tüketim yan yana */}
+          <div className="flex items-center gap-5 px-12 -mt-2">
+            {/* Series Legend Items */}
+            {isLegend && series.map((s, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <span 
+                  className="w-3 h-3 rounded-sm"
+                  style={{ backgroundColor: s.color || '#FFA600' }}
+                />
+                <span className="text-xs font-semibold text-gray8 dark:text-gray4">
+                  {s.name}
+                </span>
+              </div>
+            ))}
+            
+            {/* İdeal Tüketim Toggle */}
+            {onToggleAverageLine && (
+              <label 
+                className="flex items-center gap-2 cursor-pointer select-none"
+                onClick={() => onToggleAverageLine(!showAverageLine)}
+              >
+                <span 
+                  className="w-6 h-0"
+                  style={{ 
+                    borderTop: showAverageLine ? '2px dashed #EF4444' : '2px dashed #9CA3AF'
+                  }}
+                />
+                <span 
+                  className={`text-xs font-semibold transition-colors ${
+                    showAverageLine 
+                      ? 'text-gray8 dark:text-gray4' 
+                      : 'text-gray-400 dark:text-gray-500'
+                  }`}
+                >
+                  {t("global.idealConsumption") || "İdeal Tüketim"}
+                </span>
+              </label>
+            )}
+          </div>
         </div>
       )}
 

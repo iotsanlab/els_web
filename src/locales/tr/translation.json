@@ -2,6 +2,7 @@
   "global": {
     "kWh": "kWh",
     "kWh/s": "kWh",
+    "idealConsumption": "İdeal Tüketim",
     "avg": "Ortalama",
     "machineTypeNotif": "Makine Tipi Özel Ayarlar",
     "weatherSettings": "Hava Durumu Ayarları",
@@ -39,6 +40,7 @@
     "noAssig": "Atanmamış",
     "fuelGraphTitle": "Tüketilen Enerji (kWh)",
     "workingGraphTitle": "Çalışma Süresi (sa.)",
+    "idealLine": "İdeal Tüketim",
     "save": "Kaydet",
     "cancel": "İptal",
     "AkuGerilimiTrack": "Ölçülen Akü Gerilimi",
@@ -745,5 +747,6 @@
     "success": "Şifreniz başarıyla güncellendi",
     "error": "Şifre sıfırlama sırasında hata oluştu. Sistem yöneticinizle iletişime geçiniz."
   },
-  "Ground Mode": "Yer Modu"
+  "Ground Mode": "<0>Yer Modu</0>",
+  "Platform Mode": "<0>Platform Modu</0>"
 }
