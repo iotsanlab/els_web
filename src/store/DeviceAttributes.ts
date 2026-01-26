@@ -30,7 +30,7 @@ class DeviceAttributesStore {
 
   clear() {
     this.attributesMap.clear();
-    this.saveToStorage();
+    localStorage.removeItem('deviceAttributes');
   }
 
   private saveToStorage() {

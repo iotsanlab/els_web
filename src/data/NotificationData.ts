@@ -110,5 +110,12 @@ export const NotificationData = [
     "name_tr": "Coğrafi Sınır Alarmı",
     "data_key": [],
     "severity": "MAJOR"
+  },
+  {
+    "id": 17,
+    "name_en": "Low Battery",
+    "name_tr": "Düşük Batarya",
+    "data_key": [],
+    "severity": "MAJOR"
   }
 ];

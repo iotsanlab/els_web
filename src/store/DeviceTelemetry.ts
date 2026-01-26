@@ -228,7 +228,7 @@ getDailyFormatted(
 
   clear() {
     this.telemetryMap.clear();
-    this.saveToStorage();
+    localStorage.removeItem('deviceTelemetry');
   }
 
   private saveToStorage() {

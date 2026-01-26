@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { userStore } from "../../store/UserStore";
 import { UserLogin } from "../../services/auth";
+import { clearAllCachedData } from "../../routes/PrivateRoute/auth";
 import mstLoginLogo from "../../assets/images/logo.png";
 import { SvgIcons } from "../../assets/icons/SvgIcons";
 import ForgotPassModal from "../../components/Modal/forgotPass";
@@ -86,6 +87,9 @@ const LoginPage: React.FC = () => {
     if (isEmail(email)) {
       setLoading(true);
       try {
+        // Login öncesi eski kullanıcının cache'ini temizle (cache karışıklığını önler)
+        clearAllCachedData();
+        
         const data = await UserLogin(email, password);
         userStore.setUser({
           token: data.token,

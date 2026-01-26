@@ -2,7 +2,7 @@ import { SvgIcons } from "../../assets/icons/SvgIcons";
 import { useDarkMode } from "../../context/DarkModeContext";
 import LineChart from "../LineChart";
 import RadialChart from "../RadialChart";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 //
 import React, { useEffect, useMemo, useRef, useState } from "react";
 //
@@ -191,7 +191,11 @@ const Render: React.FC<Props> = ({
       <>
         <div className="flex flex-col items-center justify-center w-full h-full ">
           <p className="text-[48px] font-bold leading-normal tracking-wide text-gray10 dark:text-white ">
-            {t(displayValue?.toString() || "0")}
+            <Trans
+             i18nKey={displayValue?.toString() || "0"}
+              values={{ value: displayValue?.toString() || "0" }}
+              components={{ 0: <span className="text-red-500" /> }}
+            /> 
           </p>
           <p className="text-[16px] font-bold leading-normal tracking-wide text-gray10 dark:text-white  ">
             {valueTitle}

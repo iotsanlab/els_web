@@ -43,6 +43,11 @@ class ParamStore {
       }
     }
   }
+
+  clear() {
+    this.paramSelections = {};
+    localStorage.removeItem("paramSelections");
+  }
 }
 
 const paramStore = new ParamStore();

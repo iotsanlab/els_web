@@ -3,10 +3,6 @@ import { SvgIcons } from '../../assets/icons/SvgIcons';
 import { useEffect, useRef } from 'react';
 import { authUtils } from '../../routes/PrivateRoute/auth';
 import { useTranslation } from 'react-i18next';
-import allDevices from '../../store/AllDevices';
-import { deviceStore } from '../../store/DeviceStore';
-import deviceAttributes from '../../store/DeviceAttributes';
-import deviceWorkStore from '../../store/DeviceTelemetry';
 
 interface Props {
   isClicked?: boolean;
@@ -32,11 +28,8 @@ const ProfileDropdown = ({ isClicked, onClickOutside }: Props) => {
   }, [onClickOutside]);
 
   const handleLogout = () => {
+    // authUtils.logout() tüm store ve localStorage verilerini temizler
     authUtils.logout();
-    deviceAttributes.clear();
-    allDevices.clearData();
-    deviceStore.clearData();
-    deviceWorkStore.clear();
   }
 
   return (
