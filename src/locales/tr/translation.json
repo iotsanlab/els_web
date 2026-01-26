@@ -744,5 +744,6 @@
     "passwordMismatch": "Şifreler eşleşmiyor",
     "success": "Şifreniz başarıyla güncellendi",
     "error": "Şifre sıfırlama sırasında hata oluştu. Sistem yöneticinizle iletişime geçiniz."
-  }
+  },
+  "Ground Mode": "Yer Modu"
 }

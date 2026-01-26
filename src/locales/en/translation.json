@@ -747,5 +747,6 @@
     "passwordMismatch": "Passwords do not match",
     "success": "Your password has been successfully updated",
     "error": "An error occurred while resetting your password. Please contact your system administrator."
-  }
+  },
+  "Ground Mode": "Ground Mode"
 }

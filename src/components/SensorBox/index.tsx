@@ -191,7 +191,7 @@ const Render: React.FC<Props> = ({
       <>
         <div className="flex flex-col items-center justify-center w-full h-full ">
           <p className="text-[48px] font-bold leading-normal tracking-wide text-gray10 dark:text-white ">
-            {displayValue || 0}
+            {t(displayValue?.toString() || "0")}
           </p>
           <p className="text-[16px] font-bold leading-normal tracking-wide text-gray10 dark:text-white  ">
             {valueTitle}
