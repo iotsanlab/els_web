@@ -50,6 +50,7 @@ export interface MachineParameters {
 }
 
 export interface MachineParameter {
+  reverseColor?: boolean;
   type: string;
   lang_key: string;
   parameter: string;

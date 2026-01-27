@@ -2132,6 +2132,7 @@ const machineParametersByType: Record<string, MachineParameter[]> = {
       type: "empty",
       lang_key: "parameterName.lift.BatteryLevel",
       parameter: "BatteryLevel",
+      reverseColor: true,
       chartType: "linear",
       title: "parameterName.lift.BatteryLevel",
       valueTitle: "%",

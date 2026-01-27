@@ -2,9 +2,10 @@ interface LineChartProps {
     value?: number;
     maxValue?: number;
     minValue?: number;
+    reverseColor?: boolean;
 }
 
-const LineChart = ({ value = 0, maxValue = 100, minValue = 0 }: LineChartProps) => {
+const LineChart = ({ value = 0, maxValue = 100, minValue = 0, reverseColor = false }: LineChartProps) => {
     // Değerin min ve max arasındaki yüzdesini hesapla
     const percentage = Math.min(100, Math.max(0, ((value - minValue) / (maxValue - minValue)) * 100));
     
@@ -17,15 +18,29 @@ const LineChart = ({ value = 0, maxValue = 100, minValue = 0 }: LineChartProps) 
     // Değere göre renk belirle
     let barColor = "#5EB044"; // Varsayılan yeşil
     
-    if (value < minValue + (maxValue - minValue) * 0.3) {
-        // Değer çok düşükse kırmızı
-        barColor = "#5EB044";
-    } else if (value > average && value < average + (maxValue - average) * 0.6) {
-        // Değer ortalamanın üstündeyse sarı
-        barColor = "#FFD600";
-    } else if (value >= average + (maxValue - average) * 0.6) {
-        // Değer çok yüksekse kırmızı
-        barColor = "#E84747";
+   
+    if (reverseColor) {
+        if (value < minValue + (maxValue - minValue) * 0.3) {
+            // Değer çok düşükse kırmızı
+            barColor = "#E84747";
+        } else if (value > average && value < average + (maxValue - average) * 0.6) {
+            // Değer ortalamanın üstündeyse sarı
+            barColor = "#FFD600";
+        } else if (value >= average + (maxValue - average) * 0.6) {
+            // Değer çok yüksekse kırmızı
+            barColor = "#5EB044";
+        }
+    } else {
+        if (value < minValue + (maxValue - minValue) * 0.3) {
+            // Değer çok düşükse kırmızı
+            barColor = "#5EB044";
+        } else if (value > average && value < average + (maxValue - average) * 0.6) {
+            // Değer ortalamanın üstündeyse sarı
+            barColor = "#FFD600";
+        } else if (value >= average + (maxValue - average) * 0.6) {
+            // Değer çok yüksekse kırmızı
+            barColor = "#E84747";
+        }
     }
     
     return (

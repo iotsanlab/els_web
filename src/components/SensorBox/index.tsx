@@ -19,6 +19,7 @@ interface ChartCardProps {
   lastUpdateTime?: string;
   onClick?: () => void;
   onClickInfo?: () => void;
+  reverseColor?: boolean;
 }
 
 const SensorBox: React.FC<ChartCardProps> = ({
@@ -33,6 +34,7 @@ const SensorBox: React.FC<ChartCardProps> = ({
   valueSubTitle,
   onClick,
   onClickInfo,
+  reverseColor,
 }) => {
   const { isDarkMode } = useDarkMode();
 
@@ -49,6 +51,7 @@ const SensorBox: React.FC<ChartCardProps> = ({
         minValue={minValue}
         title={title}
         lastUpdateTime={lastUpdateTime}
+        reverseColor={reverseColor}
       />
     );
   }, [
@@ -155,6 +158,7 @@ interface Props {
   maxValue?: number;
   lastUpdateTime?: string;
   title?: string;
+  reverseColor?: boolean;
 }
 
 const Render: React.FC<Props> = ({
@@ -166,6 +170,7 @@ const Render: React.FC<Props> = ({
   minValue,
   title,
   lastUpdateTime,
+  reverseColor,
 }) => {
   const { t } = useTranslation();
 
@@ -223,6 +228,7 @@ const Render: React.FC<Props> = ({
           <div className="flex items-center justify-center w-full mt-5 ">
             <div className="flex items-center justify-center ">
               <LineChart
+                reverseColor={reverseColor ?? false}
                 value={displayValue}
                 maxValue={maxValue}
                 minValue={minValue}

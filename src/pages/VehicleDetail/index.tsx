@@ -354,6 +354,7 @@ const VehicleDetail = () => {
       // Default parametreler
       const DEFAULT_PARAMETERS = [
         "WorkingHours",
+        "Height",
         "BatteryLevel",
         "PlatformMODE",
         "FlashCode",
@@ -421,6 +422,7 @@ const VehicleDetail = () => {
         // Default parametreler
         const DEFAULT_PARAMETERS = [
           "WorkingHours",
+          "Height",
           "BatteryLevel",
           "PlatformMODE",
           "FlashCode",
@@ -762,7 +764,7 @@ const VehicleDetail = () => {
                   </div>
                   <p className="text-base font-medium leading-normal tracking-wide text-gray4 font-inter">
                     {t("machineInfoPage.usageCard.before", {
-                      time: beforeTotalWorkingHours,
+                      time: beforeTotalWorkingHours.toFixed(2),
                     })}{" "}
                     {selectedOption == 0 ? t("global.week") : t("global.month")}
                   </p>
@@ -809,7 +811,7 @@ const VehicleDetail = () => {
                  
                   <div className="flex items-center justift-start">
                     <p className="text-3xl font-bold leading-normal tracking-wide text-gray8 font-inter">
-                      Batarya Sağlığı
+                      {t("global.batayHealth")}
                     </p>
                    
                   </div>

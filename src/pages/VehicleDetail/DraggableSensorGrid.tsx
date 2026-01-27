@@ -91,6 +91,7 @@ const DraggableSensorBox: React.FC<DraggableSensorBoxProps> = ({
         chartType={param.chartType as "boolean" | "linear" | "empty" | "radial"}
         maxValue={param.maxValue}
         minValue={param.minValue}
+        reverseColor={param.reverseColor ?? false}
         lastUpdateTime={formattedDate}
         onClickInfo={() => openInfoModal?.(param.parameter ?? "")}
       />
