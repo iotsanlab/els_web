@@ -16,10 +16,13 @@ interface Props {
     type: "blue" | "orange";
     selectedOption?: number; // 0: Weekly, 1: Monthly
     onSelectOption?: (option: number) => void;
+    idealConsumption?: number;
+    machineCount?: number;
+    isIdealConsumption?: boolean;
 }
 
 
-const ManualBarChart = ({ sampleDataWeekly, sampleDataMonthly, title, type, onSelectOption, selectedOption }: Props) => {
+const ManualBarChart = ({ sampleDataWeekly, sampleDataMonthly, title, type, onSelectOption, selectedOption, idealConsumption, machineCount, isIdealConsumption = false }: Props) => {
     const { t } = useTranslation();
 
     const options = [t("global.weekly"), t("global.monthly")];
@@ -85,7 +88,7 @@ const ManualBarChart = ({ sampleDataWeekly, sampleDataMonthly, title, type, onSe
 };
 
     return (
-        <div className='flex flex-col w-[368px] h-[279px] bg-white dark:bg-gray10 items-start justify-between px-[20px]' >
+        <div className='flex relative flex-col w-[368px] h-[279px] bg-white dark:bg-gray10 items-start justify-between px-[20px]' >
             <div className='flex justify-between w-full'>
                 <p className="mb-4 text-[16px] font-bold tracking-wide text-gray10 font-inter dark:text-gray6">{title}</p>
                 <Dropdown
@@ -95,13 +98,32 @@ const ManualBarChart = ({ sampleDataWeekly, sampleDataMonthly, title, type, onSe
                 />
             </div>
 
-            <div
-                className={`flex items-end  h-full justify-start ${data.length > 7 ? 'space-x-[12px]' : 'space-x-[22px]'} w-[328px] dark:bg-transparent overflow-x-auto cursor-grab`}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
-            >
+            <div className="relative w-full h-full">
+                {/* İdeal Tüketim Çizgisi */}
+                {
+                    isIdealConsumption && (
+                        <div 
+                        className="absolute left-0 right-0 z-10 pointer-events-none"
+                        style={{ bottom: `${handleBarHeight(data, (idealConsumption && machineCount) ? idealConsumption * machineCount : 0, type) + 20 + 12  }px` }}
+                    >
+                        <div className="flex items-center w-full">
+                        <span className="px-1.5 py-0.5 text-[10px] font-bold text-white bg-red-500 rounded ml-1">
+                                {t("global.idealConsumption") || "İdeal Tüketim"} : {(idealConsumption && machineCount) ? idealConsumption * machineCount : 0}
+                            </span>
+                            <div className="flex-1 h-0" style={{ borderTop: '2px dashed #EF4444' }} />
+                            
+                        </div>
+                    </div>
+                    )
+                }
+                
+                <div
+                    className={`flex items-end h-full justify-start ${data.length > 7 ? 'space-x-[12px]' : 'space-x-[22px]'} w-[328px] dark:bg-transparent overflow-x-auto cursor-grab`}
+                    onMouseDown={handleMouseDown}
+                    onMouseMove={handleMouseMove}
+                    onMouseUp={handleMouseUp}
+                    onMouseLeave={handleMouseUp}
+                >
                 {data.map((item, index) => (
                     <div
                         key={index}
@@ -110,7 +132,6 @@ const ManualBarChart = ({ sampleDataWeekly, sampleDataMonthly, title, type, onSe
                         onMouseLeave={() => setHoveredBar(null)}  // Hover çıkınca
                     >
                         <div className='flex flex-col items-center justify-end w-full h-full'>
-
 
                             <div
                                 className={`relative rounded-[4px] 
@@ -143,7 +164,11 @@ const ManualBarChart = ({ sampleDataWeekly, sampleDataMonthly, title, type, onSe
                         </div>
                     </div>
                 ))}
+                </div>
             </div>
+            
+            {/* Legend - İdeal Tüketim çizgisi */}
+          
         </div>
     );
 };

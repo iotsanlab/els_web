@@ -449,11 +449,15 @@ const NotificationPage = () => {
                         fill={`${getStatusColor(alarm.details?.id)}`}
                       />
 
-                      <img
+                     {
+                      /*
+                       <img
                         className="max-w-[48px]"
                         src={renderServiceImage(alarm.machineType)}
                         alt={alarm.machineType}
                       />
+                      */
+                     }
                       <div
                         className="flex flex-col w-full gap-1 cursor-pointer"
                         onClick={() => navigate("/vehicle/" + alarm.deviceId)}

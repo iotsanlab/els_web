@@ -81,13 +81,13 @@ const NotificationItem: React.FC<NotificationItemProps> = React.forwardRef(
         onClick={() => navigation("/vehicle/" + deviceId)}
         className="flex items-center justify-between p-[10px] border-b border-gray-200 dark:border-gray8 hover:bg-gray-50 dark:hover:bg-gray8 transition-colors cursor-pointer">
         <div className="flex items-center">
-          <div className="mr-4">
+              {/* <div className="mr-4">
             <img
-              src={renderServiceImage(service)}
-              alt="Service"
-              className="w-[55px] h-auto"
-            />
-          </div>
+                src={renderServiceImage(service)}
+                alt="Service"
+                className="w-[55px] h-auto"
+              />
+            </div> */}
           <div className="w-full max-w-[300px]">
             <p className="text-gray10 text-[14px] font-medium dark:text-white">
               <Trans

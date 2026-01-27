@@ -353,6 +353,9 @@ useEffect(() => {
                 type="blue"
                 onSelectOption={setSelectedWorkOption}
                 selectedOption={selectedWorkOption}
+                idealConsumption={7}
+                machineCount={getFilteredDeviceCount()}
+                isIdealConsumption={true}
               />
 
               <div className="w-[4px] h-[220px] flex bg-gray1 dark:bg-gray9 rounded-[4px] mx-[8px]"></div>
@@ -365,6 +368,7 @@ useEffect(() => {
                 type="orange"
                 onSelectOption={setSelectedFuelOption}
                 selectedOption={selectedFuelOption}
+               
 
               />
 
