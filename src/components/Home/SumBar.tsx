@@ -20,7 +20,7 @@ const Box = ({title, val, color } : {title: string, val: number, color:string}) 
         </div>
     
         <div>
-            <span className="text-[32px] font-bold leading-[24px] tracking-wide text-center text-gray10 font-jakarta dark:text-white">{val} {val > 1 ? t("global.machines") : t("global.machine")}</span>
+            <span className="text-[32px] font-bold leading-[24px] tracking-wide text-center text-gray10 font-jakarta dark:text-white">{val} {val > 1 ? t("global.machines") : t("global.machines")}</span>
         </div>
     </div>
     )

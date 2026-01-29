@@ -749,5 +749,10 @@
     "error": "Şifre sıfırlama sırasında hata oluştu. Sistem yöneticinizle iletişime geçiniz."
   },
   "Ground Mode": "<0>Yer Modu</0>",
-  "Platform Mode": "<0>Platform Modu</0>"
+  "Platform Mode": "<0>Platform Modu</0>",
+  "map": {
+    "roadmap": "Harita",
+    "satellite": "Uydu",
+    "terrain": "Arazi"
+  }
 }

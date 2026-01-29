@@ -39,7 +39,6 @@ const ServiceInfoCard = ({ onBackButtonClick, className, title, address, operato
         <p className="text-base font-medium leading-normal tracking-wide text-left text-gray6 font-inter">{address}</p>
 
         <div className="w-full max-w-[230px]  py-[10px] my-[4px]">
-        <img src={logo} alt="Service" className="w-full mt-[10px]" />
         </div>
         <div className="flex flex-col items-start justify-between w-full mt-[10px]">
             <h1 className="text-2xl font-bold leading-normal tracking-wide text-left text-gray4 font-inter text-[20px]">

@@ -99,21 +99,44 @@ const ManualBarChart = ({ sampleDataWeekly, sampleDataMonthly, title, type, onSe
             </div>
 
             <div className="relative w-full h-full">
-                {/* İdeal Tüketim Çizgisi */}
+                {/* İdeal Tüketim Aralığı - machineCount * 6 ile machineCount * 7 arası */}
                 {
-                    isIdealConsumption && (
-                        <div 
-                        className="absolute left-0 right-0 z-10 pointer-events-none"
-                        style={{ bottom: `${handleBarHeight(data, (idealConsumption && machineCount) ? idealConsumption * machineCount : 0, type) + 20 + 12  }px` }}
-                    >
-                        <div className="flex items-center w-full">
-                        <span className="px-1.5 py-0.5 text-[10px] font-bold text-white bg-red-500 rounded ml-1">
-                                {t("global.idealConsumption") || "İdeal Tüketim"} : {(idealConsumption && machineCount) ? idealConsumption * machineCount : 0}
-                            </span>
-                            <div className="flex-1 h-0" style={{ borderTop: '2px dashed #EF4444' }} />
-                            
-                        </div>
-                    </div>
+                    isIdealConsumption && machineCount && (
+                        <>
+                            {/* Alt ve üst değerler */}
+                            {(() => {
+                                const minIdeal = machineCount * 6;
+                                const maxIdeal = machineCount * 7;
+                                const bottomPos = handleBarHeight(data, minIdeal, type) + 20 + 12;
+                                const topPos = handleBarHeight(data, maxIdeal, type) + 20 + 12;
+                                const bandHeight = topPos - bottomPos;
+                                
+                                return (
+                                    <div 
+                                        className="absolute left-0 right-0 z-10 pointer-events-none"
+                                        style={{ bottom: `${bottomPos}px`, height: `${bandHeight}px` }}
+                                    >
+                                        {/* Üst çizgi */}
+                                        <div 
+                                            className="absolute top-0 left-0 right-0"
+                                            style={{ borderTop: '1.5px dashed rgba(20, 184, 166, 0.6)' }} 
+                                        />
+                                        {/* Arası - soft gradient band */}
+                                        <div 
+                                            className="absolute inset-0 rounded-sm"
+                                            style={{ 
+                                                background: 'linear-gradient(180deg, rgba(20, 184, 166, 0.12) 0%, rgba(20, 184, 166, 0.06) 50%, rgba(20, 184, 166, 0.12) 100%)',
+                                            }} 
+                                        />
+                                        {/* Alt çizgi */}
+                                        <div 
+                                            className="absolute bottom-0 left-0 right-0"
+                                            style={{ borderTop: '1.5px dashed rgba(20, 184, 166, 0.6)' }} 
+                                        />
+                                    </div>
+                                );
+                            })()}
+                        </>
                     )
                 }
                 

@@ -70,7 +70,7 @@ const ServiceItem: React.FC<ServiceItemProps> = ({
 
 
   return (
-    <div className="flex w-full h-[250px] bg-white dark:bg-gray10 rounded-[10px] drop-shadow-[2px_2px_4px_#00000026] p-6 mb-4 items-center justify-between ">
+    <div className="flex w-full h-[200px] bg-white dark:bg-gray10 rounded-[10px] drop-shadow-[2px_2px_4px_#00000026] p-6 mb-4 items-center justify-between ">
       <div className="flex flex-col h-full w-full">
 
         <h3 className="text-gray10 dark:text-white font-inter font-bold text-base mb-[10px]">{name}</h3>
@@ -80,10 +80,7 @@ const ServiceItem: React.FC<ServiceItemProps> = ({
             <InfoBar title={t("servicePage.card.area")} desc={region} />
             <InfoBar title={t("servicePage.card.city")} desc={city} />
             <InfoBar title={t("servicePage.card.address")} desc={address} />
-            <InfoBar title={t("servicePage.card.auth")} desc={authorizedPerson} />
             <InfoBar title={t("servicePage.card.phone")} desc={phone[0]} />
-            <InfoBar title={t("servicePage.card.fax")} desc={fax} />
-            <InfoBar title={t("servicePage.card.mail")} desc={email} />
           </div>
 
           <div className="flex items-center dark:items-start gap-4 h-full">

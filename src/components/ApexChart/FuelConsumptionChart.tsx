@@ -18,6 +18,8 @@ interface FuelConsumptionData {
   isTooltipText?: boolean;
   showAverageLine?: boolean;
   averageValue?: number;
+  minIdealValue?: number;
+  maxIdealValue?: number;
   onToggleAverageLine?: (value: boolean) => void;
 }
 
@@ -30,6 +32,8 @@ const FuelConsumptionChart: React.FC<FuelConsumptionData> = ({
   isTooltipText = true,
   showAverageLine = false,
   averageValue = 7,
+  minIdealValue = 6,
+  maxIdealValue = 7,
   onToggleAverageLine
 }) => {
   const { isDarkMode } = useDarkMode();
@@ -203,23 +207,13 @@ const FuelConsumptionChart: React.FC<FuelConsumptionData> = ({
       },
       annotations: {
         yaxis: showAverageLine ? [{
-          y: averageValue,
-          borderColor: '#EF4444',
-          borderWidth: 2,
-          strokeDashArray: 5,
-          label: {
-            borderColor: '#EF4444',
-            style: {
-              color: '#fff',
-              background: '#EF4444',
-              fontSize: '11px',
-              fontWeight: 'bold',
-            },
-            text: `İdeal: ${averageValue}`,
-            position: 'left',
-            offsetX: 40,
-            offsetY: 0,
-          }
+          y: minIdealValue,
+          y2: maxIdealValue,
+          borderColor: 'rgba(34, 197, 94, 0.6)',
+          borderWidth: 1,
+          strokeDashArray: 4,
+          fillColor: 'rgba(34, 197, 94, 0.12)',
+          opacity: 1,
         }] : []
       },
     },
@@ -278,28 +272,18 @@ useEffect(() => {
       },
       annotations: {
         yaxis: showAverageLine ? [{
-          y: averageValue,
-          borderColor: '#EF4444',
-          borderWidth: 2,
-          strokeDashArray: 5,
-          label: {
-            borderColor: '#EF4444',
-            style: {
-              color: '#fff',
-              background: '#EF4444',
-              fontSize: '11px',
-              fontWeight: 'bold',
-            },
-            text: `İdeal: ${averageValue}`,
-            position: 'left',
-            offsetX: 40,
-            offsetY: 0,
-          }
+          y: minIdealValue,
+          y2: maxIdealValue,
+          borderColor: 'rgba(34, 197, 94, 0.6)',
+          borderWidth: 1,
+          strokeDashArray: 4,
+          fillColor: 'rgba(34, 197, 94, 0.12)',
+          opacity: 1,
         }] : []
       }
     }
   }));
-}, [series, days, isDarkMode, showAverageLine, averageValue]);
+}, [series, days, isDarkMode, showAverageLine, averageValue, minIdealValue, maxIdealValue]);
 
 
 
@@ -406,9 +390,12 @@ useEffect(() => {
                 onClick={() => onToggleAverageLine(!showAverageLine)}
               >
                 <span 
-                  className="w-6 h-0"
+                  className="w-6 h-3 rounded-sm"
                   style={{ 
-                    borderTop: showAverageLine ? '2px dashed #EF4444' : '2px dashed #9CA3AF'
+                    background: showAverageLine 
+                      ? 'linear-gradient(180deg, rgba(34, 197, 94, 0.35) 0%, rgba(34, 197, 94, 0.15) 50%, rgba(34, 197, 94, 0.35) 100%)'
+                      : 'rgba(156, 163, 175, 0.3)',
+                    border: showAverageLine ? '1px dashed rgba(34, 197, 94, 0.7)' : '1px dashed #9CA3AF'
                   }}
                 />
                 <span 

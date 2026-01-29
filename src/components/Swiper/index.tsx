@@ -242,6 +242,8 @@ const generateSeries = (
           isFuel={true}
           showAverageLine={showFuelAverageLine}
           averageValue={7}
+          minIdealValue={6}
+          maxIdealValue={7}
           onToggleAverageLine={setShowFuelAverageLine}
         />
 

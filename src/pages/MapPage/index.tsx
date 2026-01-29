@@ -313,20 +313,25 @@ const MapPage = () => {
         : machine.user_fullname || "",
     }));
 
-    // Servislerin verilerini yükle
-    const serviceLocations = service_locations[0].allServices.map(
-      (service) => ({
-        id: machineStore.getAllMachines().length + service.id || 0,
+    // Servislerin verilerini yükle (localServices + abroadServices)
+    const allServices = [
+      ...(service_locations[0]?.localServices || []),
+      ...(service_locations[0]?.abroadServices || [])
+    ];
+    
+    const serviceLocations = allServices.map(
+      (service: any) => ({
+        id: machineStore.getAllMachines().length + (service.id || 0),
         serviceId: service.id || 0,
         name: service.name || "",
         type: "service",
         visible: true,
-        latitude: parseFloat(service.lat as unknown as string) || 0,
-        longitude: parseFloat(service.long as unknown as string) || 0,
+        latitude: parseFloat(String(service.lat)) || 0,
+        longitude: parseFloat(String(service.long)) || 0,
         hours: 0,
         contact: service.authorizedPerson || "",
         maintenance: service.address || "",
-        operator: typeof service.phone === "string" ? service.phone : "",
+        operator: Array.isArray(service.phone) ? service.phone[0] : (service.phone || ""),
       })
     );
 
@@ -647,14 +652,18 @@ const MapPage = () => {
       }
 
       if (type === "service") {
-        const service = service_locations[0].allServices.find(
-          (s) => s.id === serviceId
-        );
+        const allServicesData = [
+          ...(service_locations[0]?.localServices || []),
+          ...(service_locations[0]?.abroadServices || [])
+        ];
+        const service = allServicesData.find(
+          (s: any) => s.id === serviceId
+        ) as any;
         setServiceInfoMenu({
           title: service?.name || "",
           operatorName: service?.authorizedPerson || "",
           address: service?.address || "",
-          phoneNumber: service?.phone.shift() || "",
+          phoneNumber: Array.isArray(service?.phone) ? service.phone[0] : (service?.phone || ""),
           email: service?.email || "",
         });
       }

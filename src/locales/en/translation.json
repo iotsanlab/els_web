@@ -752,5 +752,10 @@
     "error": "An error occurred while resetting your password. Please contact your system administrator."
   },
   "Ground Mode": "<0>Ground Mode</0>",
-  "Platform Mode": "<0>Platform Mode</0>"
+  "Platform Mode": "<0>Platform Mode</0>",
+  "map": {
+    "roadmap": "Map",
+    "satellite": "Satellite",
+    "terrain": "Terrain"
+  }
 }
