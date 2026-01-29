@@ -39,7 +39,7 @@ const Router = () => {
 
           <Route element={<Layout />}>
             <Route path="/vehicle/:id" element={<VehicleDetail />} />
-            <Route path="/battery-healty/:id" element={<BatteryHealtyPage />} />
+            <Route path="/battery-health/:id" element={<BatteryHealtyPage />} />
             <Route index path="/home" element={<HomePage />} />
             <Route path="/Operators" element={<OperatorsPage />} />
             <Route path="/Vehicles" element={<Vehicles />} />

@@ -801,7 +801,7 @@ const VehicleDetail = () => {
               </div>
 
 
-              <div className="mt-4 w-full h-[30%] flex items-center justify-start cursor-pointer">
+              <div className="mt-4 w-full h-[30%] flex items-center justify-start cursor-pointer" onClick={() => navigation(`/battery-health/${vehicleID}`)}>
                 <div className="h-full w-[20%] bg-white dark:bg-gray10 flex items-start justify-center">
                
                   <img src={machineDetailIcon} alt="info" className="w-16" />

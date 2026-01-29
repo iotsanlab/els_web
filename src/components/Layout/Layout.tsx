@@ -11,8 +11,10 @@ const Layout: React.FC = () => {
   const { isLoading } = useDeviceInitialization();
   
   const isVehiclePage = location.pathname.startsWith('/vehicle/');
+
+  const isBatteryHealthPage = location.pathname.startsWith('/battery-health/');
   
-  const mainClassName = isVehiclePage
+  const mainClassName = isVehiclePage || isBatteryHealthPage
     ? 'bg-gray2 dark:bg-darkBgColor flex-1 p-0 overflow-hidden'
     : 'bg-gray2 dark:bg-darkBgColor flex-1 pl-[30px] pr-[110px] pb-4 overflow-auto pt-4';
 

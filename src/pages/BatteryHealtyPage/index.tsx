@@ -10,7 +10,11 @@ import { getDevices } from "../../services/devices";
 import { useEffect, useState } from "react";
 import { getValuesAttributes, getValuesTimeSeries } from "../../services/telemetry";
 import GeneralTitle from "../../components/GeneralTitle";
-
+import deviceAttributes from "../../store/DeviceAttributes";
+import deviceWorkStore from "../../store/DeviceTelemetry";
+import { useParams } from "react-router-dom";
+import { useNotification } from "../../hooks/useNotification";
+import { useTranslation } from "react-i18next";
 
 
 export enum MachineType {
@@ -36,12 +40,25 @@ interface Device {
 }
 
 const BatteryHealtyPage = () => {
-
+    const { id } = useParams();
+    const { t } = useTranslation();
   const [devices, setDevices] = useState<Device[]>([]);
+  const [vehicleID, setVehicleID] = useState<any>();
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [deviceAttributes, setDeviceAttributes] = useState<Record<string, string>>({}); // Attribute'leri saklayan state
+  const [fetchedDeviceAttributes, setFetchedDeviceAttributes] = useState<Record<string, string>>({}); // Attribute'leri saklayan state
   const [deviceTelemetry, setDeviceTelemetry] = useState<Record<string, string>>({});
+  const [vehicle, setVehicle] = useState<any>();
+
+
+  const { alarms: vehicleAlarms, isLoading: isVehicleAlarmsLoading } = useNotification({
+    autoRefresh: true,
+    pageSize: 100,
+    deviceId: vehicleID
+  });
+
+
+  const machineList = deviceAttributes.all;
 
   const getTimestamp = (daysAgo, endOfDay = false) => {
     const date = new Date();
@@ -49,6 +66,37 @@ const BatteryHealtyPage = () => {
     date.setHours(endOfDay ? 23 : 0, endOfDay ? 59 : 0, endOfDay ? 59 : 0, 999);
     return date.getTime();
   };
+
+  useEffect(() => {
+    if (!id) return;
+
+    const selectedEntry = machineList.find(([machineId]) => machineId === id);
+   
+    if (!selectedEntry) return;
+
+    const [deviceId, attrs] = selectedEntry;
+
+    const getAttr = (key: string) =>
+      attrs.find((a: { key: string; value: any }) => a.key === key)?.value ?? "";
+
+    const singleMapped = {
+      type: getAttr("Type"),
+      SeriNo: getAttr("SeriNo"),
+      model: getAttr("Model"),
+      isTelehandlerV2Image: getAttr("isTelehandlerV2Image"),
+      subtype: getAttr("Subtype"),
+      active: deviceWorkStore.getTelemetry(deviceId, "stat").at(-1)?.value,
+      instantFuel: deviceWorkStore.getTelemetry(deviceId, "EngFuelRate").at(-1)?.value,
+      totalWorkingHours: deviceWorkStore.getTelemetry(deviceId, "WorkingHours").at(-1)?.value,
+      totalUsedFuel: deviceWorkStore.getTelemetry(deviceId, "EngTotalFuelUsed").at(-1)?.value,
+      id: deviceId,
+      opName: getAttr("opName"),
+      deviceName: getAttr("deviceName"),
+    };
+
+    setVehicle(singleMapped);
+    setVehicleID(id);
+  }, [id, machineList]);
   
  useEffect(() => {
   const start = getTimestamp(6, false); // 6 gün önce, günün başlangıcı (00:00:00)
@@ -97,7 +145,7 @@ const BatteryHealtyPage = () => {
         return acc;
       }, {});
 
-      setDeviceAttributes(formattedAttributes);
+      setFetchedDeviceAttributes(formattedAttributes);
     } catch (error) {
       console.error(`Error fetching details for device ${entityId}:`, error);
     }
@@ -175,29 +223,38 @@ const BatteryHealtyPage = () => {
 
 
   return (
-    <div className="flex h-full">
+    <div className="flex w-full h-full grid-cols-12 overflow-none ">
       {/* Sol taraf - InfoMenu */}
-      <div className="flex-shrink-0">
-        <InfoMenu
-          serialNo={"1234-1234-1234"}
-          title={"Manlift ELS-1"}
-          totalHours={"1925 sa"}
-          operator={"Burak DİLAVEROĞLU"}
-          lock={true}
-          avgFuel={"5.3 Lt / sa"}
-          instantFuel={"4.5 Lt / sa"}
-          trip={"25 Lt / 4 sa 45 dk"}
-          defAmount={"%70 200 Lt"}
-          hydraulicPressure={""}
-          hydOilHeat={""}
-          engineWaterHeat={""}
-          saseNo="94310549368"
-          type={MachineType.EXCAVATOR}
-          warningCodes={warningList}
-          model="A515"
-          imei={deviceAttributes.Imei}
-        />
-      </div>
+      <InfoMenu
+        id={vehicleID}
+        deviceId={vehicle?.id}
+        serialNo={vehicle?.SeriNo || ""}
+        subtype={vehicle?.subtype || ""}
+        title={vehicle?.model || ""}
+        isTelehandlerV2={vehicle?.isTelehandlerV2Image || false}
+        totalHours={
+          (vehicle?.totalWorkingHours?.toFixed(2) || "0") + " " + t("global.h")
+        }
+        operator={vehicle?.opName || "-"}
+        avgFuel={
+          isNaN(vehicle?.totalUsedFuel / vehicle?.totalWorkingHours)
+            ? "-"
+            : (vehicle.totalUsedFuel / vehicle.totalWorkingHours).toFixed(2) +
+            " " +
+            t("global.L/h")
+        }
+        instantFuel={
+          (vehicle?.instantFuel ? vehicle?.instantFuel.toFixed(2) : "-") +
+          " " +
+          t("global.L/h")
+        }
+        saseNo={vehicle?.SeriNo || "-"}
+        type={vehicle?.type || ""}
+        warnings={[]}
+        deviceWarnings={vehicleAlarms.filter((alarm) => alarm.subtype !== "Develon" || alarm.cleared !== true || alarm.acknowledged !== true)} // ✅ Yeni prop
+        deviceName={vehicle?.deviceName}
+      />
+
 
       
       
@@ -208,7 +265,7 @@ const BatteryHealtyPage = () => {
       <div className="bg-gray-300 p-4 rounded-lg">
         <h3 className="text-lg font-semibold">Cihaz Bilgileri</h3>
         <ul>
-          {Object.entries(deviceAttributes).map(([key, value]) => (
+          {Object.entries(fetchedDeviceAttributes).map(([key, value]) => (
             <li key={key}>
               <strong>{key}:</strong> {value}
             </li>
