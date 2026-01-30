@@ -1,7 +1,9 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import { useTranslation } from 'react-i18next';
 
 const DailyWorking: React.FC = () => {
+    const { t } = useTranslation();
     const data = [
         { date: '01.02.2025', hours: 4.70 },
         { date: '02.02.2025', hours: 4.80 },
@@ -16,7 +18,7 @@ const DailyWorking: React.FC = () => {
 
         <div className="w-full h-full rounded-xl items-start justify-start p-4 flex border-[0.5px] border-gray22 rounded-xl mx-2">
             <div className='flex flex-col'>
-                <h2 className="text-gray8 text-sm font-outfit font-bold mb-8">Daily Working Hours</h2>
+                <h2 className="text-gray8 text-sm font-outfit font-bold mb-8">{t("batteryHealthPage.dailyWorkingHours")}</h2>
 
                 <div className="w-full h-[400px]">
                     <BarChart

@@ -206,14 +206,14 @@ const BatteryHealtyPage = () => {
 
 
   const items = [
-    { title: "Terminal Status ", desc: deviceTelemetry.stat == "0" ? "Offline" : "Online" },
-    { title: "Device Signal", desc: "", isPercentage: true, percentageValue: 60 },
-    { title: "Total Working Hours (h)", desc: parseFloat(deviceTelemetry.WorkingHours).toFixed(1) },
-    { title: "Cumulative Charge (kWh)", desc: "320" },
-    { title: "Charging Cycle (qty) ", desc: "230" },
-    { title: "Remaining Charging Cycle (qty)", desc: "230" },
-    { title: "Ave. Daily Working Hours in the month (h)", desc: "230" },
-    { title: "Accumulated Working Hours in the month (h)", desc: "230" }
+    { title: t("batteryHealthPage.terminalStatus"), desc: deviceTelemetry.stat == "0" ? t("batteryHealthPage.offline") : t("batteryHealthPage.online") },
+    { title: t("batteryHealthPage.deviceSignal"), desc: "", isPercentage: true, percentageValue: 60 },
+    { title: t("batteryHealthPage.totalWorkingHours"), desc: parseFloat(deviceTelemetry.WorkingHours).toFixed(1) },
+    { title: t("batteryHealthPage.cumulativeCharge"), desc: "320" },
+    { title: t("batteryHealthPage.chargingCycle"), desc: "230" },
+    { title: t("batteryHealthPage.remainingChargingCycle"), desc: "230" },
+    { title: t("batteryHealthPage.aveDailyWorkingHours"), desc: "230" },
+    { title: t("batteryHealthPage.accumulatedWorkingHours"), desc: "230" }
   ];
 
   useEffect(() => {
@@ -296,17 +296,17 @@ const BatteryHealtyPage = () => {
         <div className="flex-1 overflow-y-auto overflow-x-hidden">
           <div className="flex flex-wrap gap-6 p-6 min-w-[1200px]">
             <div className="flex flex-col w-full">
-              <GeneralTitle title="System Dashboard" />
+              <GeneralTitle title={t("batteryHealthPage.systemDashboard")} />
 
               <div className="flex items-center justify-between mt-2">
                 <div className="bg-gray-300 h-[500px] w-[calc(33.333%_-_1.5rem)] flex items-center justify-center">
-                  <DashboardCard title="System Dashboard" items={items} />
+                  <DashboardCard title={t("batteryHealthPage.systemDashboard")} items={items} />
                 </div>
                 <div className="bg-gray-300 h-[500px] w-[calc(33.333%_-_1.5rem)] flex items-center justify-center">
                   <BatteryHealth val1="96.40" val2="98" />
                 </div>
                 <div className="bg-gray-300 h-[500px] w-[calc(33.333%_-_1.5rem)] flex items-center justify-center">
-                  <WeighLoad value={48} desc1="Platform" desc2="3''" desc3="0 mph" />
+                  <WeighLoad value={48} desc1={t("batteryHealthPage.platform")} desc2="3''" desc3="0 mph" />
                 </div>
               </div>
             </div>
@@ -314,7 +314,7 @@ const BatteryHealtyPage = () => {
 
 
             <div className="flex flex-col w-full">
-              <GeneralTitle title="Charts" />
+              <GeneralTitle title={t("batteryHealthPage.charts")} />
               <div className="flex items-center justify-between mt-2">
 
                 <div className="bg-gray-300 h-[500px] w-[calc(33.333%_-_1.5rem)] flex items-center justify-center">

@@ -1,7 +1,9 @@
 import React from 'react';
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Tooltip } from 'recharts';
+import { useTranslation } from 'react-i18next';
 
 const ChargingPatternChart: React.FC = () => {
+    const { t } = useTranslation();
     const data = [
         { hour: '0', value: 15 },
         { hour: '1', value: 12 },
@@ -31,7 +33,7 @@ const ChargingPatternChart: React.FC = () => {
 
     return (
         <div className="w-full h-full items-start justify-start p-4 bg-white rounded-xl border-[0.5px] border-gray22 mx-2">
-            <h2 className="text-gray8 text-sm font-outfit font-bold mb-8">Cumulative Charging Pattern %</h2>
+            <h2 className="text-gray8 text-sm font-outfit font-bold mb-8">{t("batteryHealthPage.cumulativeChargingPattern")}</h2>
             <div className="w-full h-[400px] flex items-center justify-center">
                 <RadarChart
                     width={400}
@@ -52,7 +54,7 @@ const ChargingPatternChart: React.FC = () => {
                         tick={{ fill: '#5D6974', fontSize: 10 }}
                     />
                     <Radar
-                        name="Charging Pattern"
+                        name={t("batteryHealthPage.chargingPattern")}
                         dataKey="value"
                         stroke="#005A9C"
                         fill="#005A9C"
@@ -64,7 +66,7 @@ const ChargingPatternChart: React.FC = () => {
                             border: '1px solid #E5E8EB',
                             borderRadius: '4px',
                         }}
-                        formatter={(value: number) => [`${value}%`, 'Charging Rate']}
+                        formatter={(value: number) => [`${value}%`, t("batteryHealthPage.chargingRate")]}
                     />
                 </RadarChart>
             </div>

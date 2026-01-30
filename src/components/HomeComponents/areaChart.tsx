@@ -1,7 +1,9 @@
 import React from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine } from 'recharts';
+import { useTranslation } from 'react-i18next';
 
 const EnergyConsumptionChart: React.FC = () => {
+    const { t } = useTranslation();
     const data = [
         { date: '01-02-2025', value: 2 },
         { date: '02-02-2025', value: 10.6 },
@@ -16,7 +18,7 @@ const EnergyConsumptionChart: React.FC = () => {
 
     return (
         <div className="w-full h-full items-start justify-start p-4 bg-white border-[0.5px] border-gray22 rounded-xl mx-2">
-            <h2 className="text-gray8 text-sm font-outfit font-bold mb-8">Energy Consumption Trend Chart</h2>
+            <h2 className="text-gray8 text-sm font-outfit font-bold mb-8">{t("batteryHealthPage.energyConsumptionTrend")}</h2>
             <div className="w-full h-[400px]">
                 <AreaChart
                     width={400}

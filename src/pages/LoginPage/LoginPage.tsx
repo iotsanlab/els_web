@@ -294,7 +294,7 @@ const LoginPage: React.FC = () => {
                     <SvgIcons iconName="Message" fill="white" />
 
                     <input
-                      placeholder={t("profilePage.emailPlaceholder")}
+                      placeholder={t("profilePage.usernamePlaceholder")}
                       id="email"
                       name="email"
                       type="email"
