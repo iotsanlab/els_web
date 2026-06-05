@@ -701,7 +701,7 @@ const MapPage = () => {
       <GeneralTitle title={t("mapPage.map")} />
       <div className="bg-white rounded-[20px] h-[inherit] border-[3px] filter drop-shadow-[2px_2px_4px_#00000026] border-white dark:bg-gray10 dark:border-gray10">
         <div className="relative w-full h-full bg-white dark:bg-gray10 rounded-[20px] overflow-hidden">
-          <APIProvider apiKey={API_KEY} libraries={["drawing"]}>
+          <APIProvider apiKey={API_KEY} libraries={["drawing"]} version="3.64">
             <Map
                key={`map-${mapKey}-${displayedLocations.length}`}
               id="map"

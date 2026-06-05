@@ -143,7 +143,7 @@ const GoogleMaps = ({ serviceLocations, className, onMarkerClick, onClick, extra
 };
 
   return (
-    <APIProvider apiKey={API_KEY}>
+    <APIProvider apiKey={API_KEY} version="3.64">
       <Map
         id="map"
         style={{ width: "auto", height: "100%" }}

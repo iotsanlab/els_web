@@ -69,7 +69,7 @@ const GoogleMapsService = ({ serviceLocations }: GoogleMapsServiceProps) => {
   return (
     <div className="w-full h-full p-1   rounded-[10px]">
       <div className="w-full h-[450px] bg-white dark:bg-gray10 p-1 rounded-[10px] custom-shadow">
-        <APIProvider apiKey={API_KEY} >
+        <APIProvider apiKey={API_KEY} version="3.64">
           <Map
             id={mapConfig.id}
             defaultCenter={center}
