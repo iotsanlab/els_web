@@ -3,7 +3,7 @@ module.exports = {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
-  ],  
+  ],
   darkMode: 'class',
   theme: {
     extend: {
@@ -21,7 +21,7 @@ module.exports = {
         white: "#FFFFFF",
         black: "#000000",
         mstYellow: {
-          DEFAULT: "#005A9C",
+          DEFAULT: "#e12627",
           dark: "#28333E",
         },
         statusGreen: "#5EB044",
@@ -30,7 +30,7 @@ module.exports = {
         statusBlue: "#0A8AD8",
         darkBgColor: '#000',
       },
-     
+
       fontFamily: {
         verdana: ['Verdana', 'sans-serif'], // Verdana fontunu ekledik
         sans: ['Arial', 'sans-serif'], // Arial fontunu ekliyoruz
