@@ -179,7 +179,7 @@ const InfoMenu = ({
     if (warningClassName) {
       onBackButtonClick?.();
     } else {
-      navigation("/Vehicles");
+      navigation(-1);
     }
   };
 
@@ -328,47 +328,47 @@ const InfoMenu = ({
 
         <div style={{ height: 20 }} />
 
-       {
-        /*
-         <Title title={t("machineInfoPage.infoCard.fuel")} />
-        <InfoBar
-          title={t("machineInfoPage.infoCard.averageFuel")}
-          desc={avgFuel}
-        />
-        */
-       }
-       
+        {
+          /*
+           <Title title={t("machineInfoPage.infoCard.fuel")} />
+          <InfoBar
+            title={t("machineInfoPage.infoCard.averageFuel")}
+            desc={avgFuel}
+          />
+          */
+        }
+
 
         <div className={`${warningClassName ? "mt-0" : "mt-[50px]"}`}>
           <Title title={t("notificationsPage.notificationDropdown.notifications")} />
         </div>
 
         <div
-        style={{ maxHeight: "400px" }}
+          style={{ maxHeight: "400px" }}
           className={`bg-gray2 dark:bg-gray9 w-full rounded-[10px] mt-2 pl-4 pt-2 overflow-y-auto ${warningClassName || "min-h-[300px]"
             }`}
         >
-          
+
           {deviceWarnings && deviceWarnings.length > 0 && (
             <div className="bg-gray2 dark:bg-gray9 w-full rounded-[10px] mt-4  pt-2">
-             
+
               {deviceWarnings.filter((alarm) => alarm.acknowledged !== true).slice(0, 10).map((alarm) => (
-                <div className="flex flex-col mb-2 cursor-pointer"  key={alarm.id} onClick={() => navigate(`/Notification?deviceId=${alarm.deviceId}`)}>
+                <div className="flex flex-col mb-2 cursor-pointer" key={alarm.id} onClick={() => navigate(`/Notification?deviceId=${alarm.deviceId}`)}>
                   <span className="text-xs font-semibold text-gray10 dark:text-white">
                     {alarm.dateTime}
                   </span>
                   <div className="flex items-center">
-                     <SvgIcons
-                        iconName="Warning"
-                        className="w-[24px]"
-                        fill={`${getStatusColor(alarm?.details?.id)}`}
-                      />
-                      
-                  <span className="ml-[10px] text-xs text-gray10 dark:text-white">
-                    {alarm.message}
-                  </span>
+                    <SvgIcons
+                      iconName="Warning"
+                      className="w-[24px]"
+                      fill={`${getStatusColor(alarm?.details?.id)}`}
+                    />
+
+                    <span className="ml-[10px] text-xs text-gray10 dark:text-white">
+                      {alarm.message}
+                    </span>
                   </div>
-                
+
                 </div>
               ))}
 
