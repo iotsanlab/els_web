@@ -298,14 +298,14 @@ const BatteryHealtyPage = () => {
             <div className="flex flex-col w-full">
               <GeneralTitle title={t("batteryHealthPage.systemDashboard")} />
 
-              <div className="flex items-center justify-between mt-2">
-                <div className="bg-gray-300 h-[500px] w-[calc(33.333%_-_1.5rem)] flex items-center justify-center">
+              <div className="flex items-center justify-between mt-2 gap-6">
+                <div className="h-[500px] w-[calc(33.333%_-_1rem)] flex items-center justify-center">
                   <DashboardCard title={t("batteryHealthPage.systemDashboard")} items={items} />
                 </div>
-                <div className="bg-gray-300 h-[500px] w-[calc(33.333%_-_1.5rem)] flex items-center justify-center">
+                <div className="h-[500px] w-[calc(33.333%_-_1rem)] flex items-center justify-center">
                   <BatteryHealth val1="96.40" val2="98" />
                 </div>
-                <div className="bg-gray-300 h-[500px] w-[calc(33.333%_-_1.5rem)] flex items-center justify-center">
+                <div className="h-[500px] w-[calc(33.333%_-_1rem)] flex items-center justify-center">
                   <WeighLoad value={48} desc1={t("batteryHealthPage.platform")} desc2="3''" desc3="0 mph" />
                 </div>
               </div>
@@ -315,15 +315,15 @@ const BatteryHealtyPage = () => {
 
             <div className="flex flex-col w-full">
               <GeneralTitle title={t("batteryHealthPage.charts")} />
-              <div className="flex items-center justify-between mt-2">
+              <div className="flex items-center justify-between mt-2 gap-6">
 
-                <div className="bg-gray-300 h-[500px] w-[calc(33.333%_-_1.5rem)] flex items-center justify-center">
+                <div className="h-[500px] w-[calc(33.333%_-_1rem)] flex items-center justify-center">
                   <DailyWorking />
                 </div>
-                <div className="bg-gray-300 h-[500px] w-[calc(33.333%_-_1.5rem)] flex items-center justify-center">
+                <div className="h-[500px] w-[calc(33.333%_-_1rem)] flex items-center justify-center">
                   <EnergyConsumptionChart />
                 </div>
-                <div className="bg-gray-300 h-[500px] w-[calc(33.333%_-_1.5rem)] flex items-center justify-center">
+                <div className="h-[500px] w-[calc(33.333%_-_1rem)] flex items-center justify-center">
                   <ChargingPatternChart />
                 </div>
               </div>

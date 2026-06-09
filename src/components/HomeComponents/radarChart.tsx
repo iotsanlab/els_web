@@ -1,9 +1,11 @@
 import React from 'react';
-import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Tooltip } from 'recharts';
+import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Tooltip } from 'recharts';
 import { useTranslation } from 'react-i18next';
+import { useDarkMode } from '../../context/DarkModeContext';
 
 const ChargingPatternChart: React.FC = () => {
     const { t } = useTranslation();
+    const { isDarkMode } = useDarkMode();
     const data = [
         { hour: '0', value: 15 },
         { hour: '1', value: 12 },
@@ -31,44 +33,48 @@ const ChargingPatternChart: React.FC = () => {
         { hour: '23', value: 15 },
     ];
 
+    const brandColor = isDarkMode ? "#e12627" : "#e12627";
+
     return (
-        <div className="w-full h-full items-start justify-start p-4 bg-white rounded-xl border-[0.5px] border-gray22 mx-2">
-            <h2 className="text-gray8 text-sm font-outfit font-bold mb-8">{t("batteryHealthPage.cumulativeChargingPattern")}</h2>
-            <div className="w-full h-[400px] flex items-center justify-center">
-                <RadarChart
-                    width={400}
-                    height={300}
-                    data={data}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={100}
-                >
-                    <PolarGrid gridType="circle" />
-                    <PolarAngleAxis
-                        dataKey="hour"
-                        tick={{ fill: '#5D6974', fontSize: 10 }}
-                    />
-                    <PolarRadiusAxis
-                        angle={30}
-                        domain={[0, 20]}
-                        tick={{ fill: '#5D6974', fontSize: 10 }}
-                    />
-                    <Radar
-                        name={t("batteryHealthPage.chargingPattern")}
-                        dataKey="value"
-                        stroke="#005A9C"
-                        fill="#005A9C"
-                        fillOpacity={0.3}
-                    />
-                    <Tooltip
-                        contentStyle={{
-                            backgroundColor: '#fff',
-                            border: '1px solid #E5E8EB',
-                            borderRadius: '4px',
-                        }}
-                        formatter={(value: number) => [`${value}%`, t("batteryHealthPage.chargingRate")]}
-                    />
-                </RadarChart>
+        <div className="w-full h-full items-start justify-start p-4 bg-white dark:bg-gray10 rounded-xl border-[0.5px] border-gray2 dark:border-gray9">
+            <h2 className="text-gray8 dark:text-white text-sm font-outfit font-bold mb-8">{t("batteryHealthPage.cumulativeChargingPattern")}</h2>
+            <div className="w-full h-[320px] flex items-center justify-center">
+                <ResponsiveContainer width="100%" height="100%">
+                    <RadarChart
+                        cx="50%"
+                        cy="50%"
+                        outerRadius="80%"
+                        data={data}
+                    >
+                        <PolarGrid stroke={isDarkMode ? '#424D57' : '#E5E8EB'} />
+                        <PolarAngleAxis
+                            dataKey="hour"
+                            tick={{ fill: isDarkMode ? '#A2ADB9' : '#5D6974', fontSize: 10 }}
+                        />
+                        <PolarRadiusAxis
+                            angle={30}
+                            domain={[0, 20]}
+                            tick={{ fill: isDarkMode ? '#A2ADB9' : '#5D6974', fontSize: 10 }}
+                            axisLine={{ stroke: isDarkMode ? '#424D57' : '#E5E8EB' }}
+                        />
+                        <Radar
+                            name={t("batteryHealthPage.chargingPattern")}
+                            dataKey="value"
+                            stroke={brandColor}
+                            fill={brandColor}
+                            fillOpacity={0.3}
+                        />
+                        <Tooltip
+                            contentStyle={{
+                                backgroundColor: isDarkMode ? '#28333E' : '#fff',
+                                border: `1px solid ${isDarkMode ? '#424D57' : '#E5E8EB'}`,
+                                borderRadius: '4px',
+                                color: isDarkMode ? '#fff' : '#000'
+                            }}
+                            formatter={(value: number) => [`${value}%`, t("batteryHealthPage.chargingRate")]}
+                        />
+                    </RadarChart>
+                </ResponsiveContainer>
             </div>
         </div>
     );
