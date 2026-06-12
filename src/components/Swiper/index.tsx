@@ -38,16 +38,27 @@ const StatisticsSwiper: React.FC<StatisticsSwiperProps> = ({ deviceId, machineTy
     return `${day} ${weekdays[date.getDay()]}`;
   }, [t]);
 
+  // Tutarlı yerel tarih key'ı oluştur (toISOString UTC'ye çevirir, timezone kayması yapar)
+  const toLocalDateKey = useCallback((ts: number) => {
+    const d = new Date(ts);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  }, []);
+
   const processFuelTelemetry = useCallback((dayCount: number) => {
-    const now = Date.now();
-    const fromTime = now - (dayCount - 1) * 24 * 60 * 60 * 1000;
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const fromTime = startOfToday - (dayCount - 1) * 24 * 60 * 60 * 1000;
+    const endTime = startOfToday + 24 * 60 * 60 * 1000 - 1; // Bugünün sonu
 
     const fuel = deviceWorkStore.getTelemetry(deviceId, "DailyEnergyConsumption")
       .filter(entry => entry.ts >= fromTime);
 
     const dateMap: Record<string, number> = {};
     for (const entry of fuel) {
-      const key = new Date(entry.ts).toISOString().slice(0, 10);
+      const key = toLocalDateKey(entry.ts);
       dateMap[key] = (dateMap[key] ?? 0) + entry.value;
     }
 
@@ -55,11 +66,11 @@ const StatisticsSwiper: React.FC<StatisticsSwiperProps> = ({ deviceId, machineTy
     const rawValues: number[] = [];
 
     const start = new Date(fromTime);
-    const end = new Date(now);
+    const end = new Date(startOfToday);
 
     // rawValues oluşturuluyor
     for (let dt = new Date(start); dt <= end; dt.setDate(dt.getDate() + 1)) {
-      const key = dt.toISOString().slice(0, 10);
+      const key = toLocalDateKey(dt.getTime());
       const ts = dt.getTime();
       resultDates.push(formatDate(ts));
 
@@ -87,12 +98,14 @@ const StatisticsSwiper: React.FC<StatisticsSwiperProps> = ({ deviceId, machineTy
 
     }]);
     setFuelDays(resultDates);
-  }, [deviceId, formatDate, t]);
+  }, [deviceId, formatDate, toLocalDateKey, t]);
 
 
   const processWorkingTelemetry = useCallback((dayCount: number) => {
-    const now = Date.now();
-    const fromTime = now - (dayCount - 1) * 24 * 60 * 60 * 1000;
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const fromTime = startOfToday - (dayCount - 1) * 24 * 60 * 60 * 1000;
+    const endTime = startOfToday + 24 * 60 * 60 * 1000 - 1; // Bugünün sonu
 
     const idle = deviceWorkStore.getTelemetry(deviceId, "DailyIdleHours").filter(entry => entry.ts >= fromTime);
     const total = deviceWorkStore.getTelemetry(deviceId, "DailyWorkingHours").filter(entry => entry.ts >= fromTime);
@@ -111,7 +124,7 @@ const StatisticsSwiper: React.FC<StatisticsSwiperProps> = ({ deviceId, machineTy
 
     const accumulate = (arr: typeof idle, key: keyof typeof dateMap[string]) => {
       for (const entry of arr) {
-        const dKey = new Date(entry.ts).toISOString().slice(0, 10);
+        const dKey = toLocalDateKey(entry.ts);
         dateMap[dKey] = {
           ...dateMap[dKey],
           ts: entry.ts,
@@ -132,8 +145,8 @@ const StatisticsSwiper: React.FC<StatisticsSwiperProps> = ({ deviceId, machineTy
 
     const totalPerDay: number[] = [];
 
-    for (let ts = fromTime; ts <= now; ts += 24 * 60 * 60 * 1000) {
-      const key = new Date(ts).toISOString().slice(0, 10);
+    for (let ts = fromTime; ts <= endTime; ts += 24 * 60 * 60 * 1000) {
+      const key = toLocalDateKey(ts);
       const formatted = formatDate(ts);
       resultDates.push(formatted);
 
@@ -207,7 +220,7 @@ const StatisticsSwiper: React.FC<StatisticsSwiperProps> = ({ deviceId, machineTy
 
     setWorkingSeries(series);
     setWorkingDays(resultDates);
-  }, [deviceId, machineType, formatDate, t]);
+  }, [deviceId, machineType, formatDate, toLocalDateKey, t]);
 
 
 
