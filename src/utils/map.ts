@@ -51,6 +51,8 @@ export interface MapInfoMenu {
     engineWaterHeat?: string;
     warnings?: any[];
     type?: string;
+    subtype?: string;
+    isTelehandlerV2?: boolean;
     saseNo?: string;
     id?:string;
     parameters?: any;

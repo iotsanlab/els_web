@@ -41,35 +41,35 @@ const ServicePage = () => {
   const [selectedCity, setSelectedCity] = useState<string>("");
   const [selectedCountry, setSelectedCountry] = useState<ServiceLocation[]>([]);
   const [filteredServiceLocations, setFilteredServiceLocations] = useState<ServiceLocation[]>([]);
-  const {t, i18n} = useTranslation();
+  const { t, i18n } = useTranslation();
 
 
   const serviceData = ServiceData[0];
 
   const filteredServices = selectedType === "type1"
     ? serviceData.localServices.filter(service =>
-        (selectedRegion ? service.region === selectedRegion : true) &&
-        (selectedCity ? service.city === selectedCity : true)
-      )
+      (selectedRegion ? service.region === selectedRegion : true) &&
+      (selectedCity ? service.city === selectedCity : true)
+    )
     : serviceData.abroadServices.filter(service =>
-        selectedRegion ? service.region === selectedRegion : true
-      );
+      selectedRegion ? service.region === selectedRegion : true
+    );
 
   useEffect(() => {
     setSelectedRegion("");
     setSelectedCity("");
-  },[selectedType]);
+  }, [selectedType]);
 
   useEffect(() => {
     setSelectedCity("");
-  },[selectedRegion]);
+  }, [selectedRegion]);
 
   useEffect(() => {
-    if(selectedType == "type2"){
+    if (selectedType == "type2") {
       const serviceLocations = ServiceData[0].abroadServices.map((service) => ({
         id: service.id,
         name: service.name,
-        region: service.region,
+        region: service.country,
         latitude: parseFloat(service.lat),
         longitude: parseFloat(service.long),
         web: service.web,
@@ -78,15 +78,15 @@ const ServicePage = () => {
         country: service.country,
         mail: service.mail
       }));
-  
+
       setSelectedCountry(serviceLocations as ServiceLocation[]);
       setFilteredServiceLocations(serviceLocations as ServiceLocation[]);
     }
 
-  },[selectedType]);
+  }, [selectedType]);
 
   useEffect(() => {
-    if(selectedType == "type2"){
+    if (selectedType == "type2") {
       // Çeviriden bağımsız olarak doğrudan region değerlerini kullanarak filtreleme
       const regionMapping: Record<string, string> = {
         [t("global.region.africa")]: "Afrika",
@@ -96,21 +96,21 @@ const ServicePage = () => {
         [t("global.region.middleEast")]: "Orta Doğu",
         [t("global.region.europe")]: "Avrupa"
       };
-      
+
       const actualRegion = regionMapping[selectedRegion] || selectedRegion;
       setFilteredServiceLocations(selectedCountry.filter((service) => service.region === actualRegion));
     }
-  },[selectedRegion, t]);
+  }, [selectedRegion, t]);
 
   const getRegionOptions = () => {
     if (selectedType === "type1") {
       return ["Adana", "İstanbul", "Gaziantep", "Ankara", "İzmir", "Trabzon", "Samsun", "Kayseri"];
     } else {
       return [
-        t("global.region.africa"), 
-        t("global.region.southAmerica"), 
-        t("global.region.cis"), 
-        t("global.region.asia"), 
+        t("global.region.africa"),
+        t("global.region.southAmerica"),
+        t("global.region.cis"),
+        t("global.region.asia"),
         t("global.region.europe")
       ];
     }
@@ -120,7 +120,7 @@ const ServicePage = () => {
 
   function getCityListByRegion(region: string): CityState {
     const cities: Set<string> = new Set();
-  
+
     // Verileri tarıyoruz
     for (const serviceData of ServiceData) {
       for (const service of serviceData.localServices) {
@@ -129,11 +129,11 @@ const ServicePage = () => {
         }
       }
     }
-  
+
     // Set'i array'e çeviriyoruz ve döndürüyoruz
     return Array.from(cities);
   }
-  
+
   // Switch-case kullanarak bölgeye göre şehir listesini alalım
   function getCities(region: string): CityState {
     switch (region) {
@@ -150,14 +150,14 @@ const ServicePage = () => {
       case "Trabzon":
         return getCityListByRegion("Trabzon");
       case "Samsun":
-          return getCityListByRegion("Samsun");
+        return getCityListByRegion("Samsun");
       case "Kayseri":
         return getCityListByRegion("Kayseri");
       default:
         return [];
     }
   }
-  
+
   return (
     <div className=" w-full flex h-full bg-gray2 dark:bg-darkBgColor justify-center  min-w-[1020px]">
       <div className="flex flex-col bg-gray2 dark:bg-darkBgColor items-start justify-start w-[1020px]">
@@ -193,22 +193,22 @@ const ServicePage = () => {
           <div className="w-[20px]"></div>
 
           {selectedType == "type1" &&
-          <div className="w-[500px]">
-          <GeneralTitle title={t("servicePage.cityFilter")} />
-          <Select
-            options={getCities(selectedRegion)}
-            value={selectedCity}
-            onChange={setSelectedCity}
-          />
-        </div>}
+            <div className="w-[500px]">
+              <GeneralTitle title={t("servicePage.cityFilter")} />
+              <Select
+                options={getCities(selectedRegion)}
+                value={selectedCity}
+                onChange={setSelectedCity}
+              />
+            </div>}
         </div>
 
         <div className="w-[1020px]">
 
-            {selectedType == "type1" ? 
+          {selectedType == "type1" ?
             <ServiceList services={filteredServices} />
-          : <GoogleMapsService serviceLocations={filteredServiceLocations} />}
-             
+            : <GoogleMapsService serviceLocations={filteredServiceLocations} />}
+
 
         </div>
       </div>

@@ -127,7 +127,7 @@ const VehicleDetail = () => {
     if (!id) return;
 
     const selectedMac = machineList.find(([machineId]) => machineId === id);
-   
+
     if (selectedMac) {
       setVehicle(selectedMac); // bu, [id, attributes[]] olacak
       setVehicleID(id);
@@ -239,20 +239,25 @@ const VehicleDetail = () => {
     }
 
     if (selectedOption === 1) {
+      // Aylık 
+      const from = now - 30 * MS_PER_DAY;
+      const beforeFrom = now - 60 * MS_PER_DAY;
+
+      const fuel = sum("DailyEnergyConsumption", from, now);
+      const prevFuel = sum("DailyEnergyConsumption", beforeFrom, from);
+
       const last30working = vehicle.last30EngHours || "0";
       const last60working = vehicle.last60EngHours || "0";
       const prevMonthWorking = last60working - last30working;
-      
-      console.log("last30working", vehicle.last30EngHours, vehicle);
+
+
+
+
       setTotalWorkingHours(+last30working);
       setBeforeTotalWorkingHours(+prevMonthWorking);
+      setTotalFuelConsumption(+fuel.toFixed(1));
+      setBeforeTotalFuelConsumption(+prevFuel.toFixed(1));
 
-      const last30fuel = parseFloat(vehicle.last30FuelCons || "0");
-      const last60fuel = parseFloat(vehicle.last60FuelCons || "0");
-      const prevMonthFuel = last60fuel - last30fuel;
-
-      setTotalFuelConsumption(+last30fuel.toFixed(1));
-      setBeforeTotalFuelConsumption(+prevMonthFuel.toFixed(1));
 
     }
   }, [selectedOption, id]);
@@ -335,7 +340,7 @@ const VehicleDetail = () => {
   const fetchData = async () => {
     try {
       setParameterLoading(true);
-      
+
 
       // Develon subtype kontrolü ile parametre listesini al
       const allParamKeys = getParameterKeys(vehicle.type, vehicle.subtype);
@@ -722,7 +727,7 @@ const VehicleDetail = () => {
                 onAddClick={() => openTransferModal()}
                 onTranslation={(key: string) => t(key)}
                 openInfoModal={(parameter: string) => openInfoModal(parameter)}
-                
+
               />
             ) : (
               <div>
@@ -770,7 +775,7 @@ const VehicleDetail = () => {
                   </p>
                 </div>
               </div>
-              
+
 
               <div className="mt-4 w-full h-[30%] flex items-center justify-start">
                 <div className="h-full w-[20%] bg-white dark:bg-gray10 flex items-start justify-center">
@@ -803,19 +808,19 @@ const VehicleDetail = () => {
 
               <div className="mt-4 w-full h-[30%] flex items-center justify-start cursor-pointer" onClick={() => navigation(`/battery-health/${vehicleID}`)}>
                 <div className="h-full w-[20%] bg-white dark:bg-gray10 flex items-start justify-center">
-               
+
                   <img src={machineDetailIcon} alt="info" className="w-16" />
-                  
+
                 </div>
                 <div className="h-full w-[80%] bg-white dark:bg-gray10 flex flex-col items-start justify-start">
-                 
+
                   <div className="flex items-center justift-start">
                     <p className="text-3xl font-bold leading-normal tracking-wide text-gray8 font-inter">
                       {t("global.batayHealth")}
                     </p>
-                   
+
                   </div>
-                 
+
                 </div>
               </div>
             </div>

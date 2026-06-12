@@ -21,8 +21,9 @@ import SetupMapControls from "./SetupMapControls";
 import { getTimerSetting, getUserId, saveWorkingAreasToAsset, saveWorkingAreasToDevice } from "../../services/auth";
 import SpacesWithDevices from "../../components/WorkSpaceWithShapes/spacesWithDevices";
 import { useNotification } from "../../hooks/useNotification";
-import { getValuesTimeSeries } from "../../services/telemetry";
+
 import { alarm } from "../../services/endpoints";
+import { refreshAllTelemetry } from "../../hooks/useDeviceInitialization";
 
 interface NearestServiceType {
   id: number;
@@ -60,6 +61,7 @@ const findNearestService = (
   machineLng: number,
   services: any[]
 ): NearestServiceType | null => {
+  if (!services || !Array.isArray(services)) return null;
   let nearestService: NearestServiceType | null = null;
   let minDistance = Infinity;
 
@@ -297,33 +299,8 @@ const MapPage = () => {
     };
   }, [displayedLocations, fromWarning, initialNearestService, machineSerialNo]);
 
+  // Servis noktalarını yükle (statik veri, sadece bir kez)
   useEffect(() => {
-    const vehicleLocations = machineStore.getAllMachines().map((machine) => {
-      // RPM değerini deviceWorkStore'dan alarak anlık status kontrolü
-      const rpm = deviceWorkStore.getTelemetry(machine.id, "RPM").at(-1)?.value || 0;
-      const isActive = rpm > 0;
-
-      return {
-        id: machine.id || 0,
-        deviceName: machine.deviceName,
-        type: machine.type || "",
-        visible: true,
-        latitude: machine.lat || 0,
-        longitude: machine.long || 0,
-        hours: machine.totalWorkingHours
-          ? machine.totalWorkingHours.toString()
-          : "",
-        instantFuel: machine.instantFuel,
-        totalUsedFuel: machine.totalUsedFuel,
-        contact: machine.model || "",
-        maintenance: machine.serialNo || "",
-        state: isActive,
-        operator: Array.isArray(machine.user_fullname)
-          ? machine.user_fullname.join(", ")
-          : machine.user_fullname || "",
-      };
-    });
-
     const serviceLocations = service_locations[0].localServices.map(
       (service) => ({
         id: machineStore.getAllMachines().length + service.id || 0,
@@ -339,15 +316,7 @@ const MapPage = () => {
         operator: typeof service.phone === "string" ? service.phone : "",
       })
     );
-
-    setVehicles(vehicleLocations as ServiceLocation[]);
     setServices(serviceLocations as ServiceLocation[]);
-
-    const allLocations = [
-      ...vehicleLocations,
-      ...serviceLocations,
-    ] as ServiceLocation[];
-    setDisplayedLocations(allLocations);
   }, []);
 
   useEffect(() => {
@@ -371,58 +340,69 @@ const MapPage = () => {
     fetchTimerSetting();
   }, [userID]);
 
+  const isMapRefreshing = useRef(false);
+
+  // Store'dan güncel vehicle locations'ı yeniden oluştur
+  const rebuildVehicleLocations = useCallback(() => {
+    const vehicleLocations = machineStore.getAllMachines().map((machine) => {
+      const statValue = deviceWorkStore.getTelemetry(machine.id, "stat").at(-1)?.value;
+      const isActive = statValue != null && Number(statValue) > 0;
+
+      const isCurrentUrlMachine = machineSerialNo && machine.serialNo === machineSerialNo;
+      const finalLat = isCurrentUrlMachine && lat ? parseFloat(lat) : (machine.lat || 0);
+      const finalLong = isCurrentUrlMachine && long ? parseFloat(long) : (machine.long || 0);
+
+      return {
+        id: machine.id || 0,
+        deviceName: machine.deviceName,
+        type: machine.type || "",
+        visible: true,
+        latitude: finalLat,
+        longitude: finalLong,
+        hours: machine.totalWorkingHours
+          ? machine.totalWorkingHours.toString()
+          : "",
+        instantFuel: machine.instantFuel,
+        totalUsedFuel: machine.totalUsedFuel,
+        contact: machine.model || "",
+        maintenance: machine.serialNo || "",
+        state: isActive,
+        operator: Array.isArray(machine.user_fullname)
+          ? machine.user_fullname.join(", ")
+          : machine.user_fullname || "",
+      };
+    });
+    setVehicles(vehicleLocations as ServiceLocation[]);
+  }, [machineSerialNo, lat, long]);
+
   useEffect(() => {
     // Timer ayarı yüklenene kadar başlatma
     if (!isTimerLoaded) return;
 
-    const fetchVehicleLocations = async () => {
+    const refreshAndRebuild = async () => {
+      // Eğer zaten bir refresh işlemi devam ediyorsa, yeni istek atma
+      if (isMapRefreshing.current) return;
+
+      isMapRefreshing.current = true;
       try {
-        const vehiclePromises = machineStore.getAllMachines().map(async (machine) => {
-          // RPM değerini API'den alarak anlık status kontrolü
-          const entityType = machine.entityType || "DEVICE";
-          const response = await getValuesTimeSeries(entityType, machine.id!, ["RPM", "stat"]) as unknown as Record<string, { ts: number; value: string }[]>;
-          const rpmData = response?.RPM;
-          const statData = response?.stat?.at(-1)?.value;
-          const rpm = rpmData?.at(-1)?.value ? parseFloat(rpmData.at(-1)!.value) : 0;
-          const statValue = statData ? parseFloat(statData) : 0;
-          const isActive = (rpm > 0 && statValue > 0);
-
-          return {
-            id: machine.id || 0,
-            deviceName: machine.deviceName,
-            type: machine.type || "",
-            visible: true,
-            latitude: machine.lat || 0,
-            longitude: machine.long || 0,
-            hours: machine.totalWorkingHours
-              ? machine.totalWorkingHours.toString()
-              : "",
-            instantFuel: machine.instantFuel,
-            totalUsedFuel: machine.totalUsedFuel,
-            contact: machine.model || "",
-            maintenance: machine.serialNo || "",
-            state: isActive,
-            operator: Array.isArray(machine.user_fullname)
-              ? machine.user_fullname.join(", ")
-              : machine.user_fullname || "",
-          };
-        });
-
-        // Tüm Promise'lerin tamamlanmasını bekle
-        const vehicleLocations = await Promise.all(vehiclePromises);
-        setVehicles(vehicleLocations as ServiceLocation[]);
+        // Tüm cihazların telemetri verilerini toplu olarak güncelle (lat/long/RPM/stat vs.)
+        await refreshAllTelemetry();
+        // Güncellenmiş store'dan vehicle locations'ı yeniden oluştur
+        rebuildVehicleLocations();
       } catch (error) {
-        console.error("Vehicle locations fetch error:", error);
+        console.error("Map telemetry refresh error:", error);
+      } finally {
+        isMapRefreshing.current = false;
       }
     };
 
     // İlk yüklemede hemen çalıştır
-    fetchVehicleLocations();
+    rebuildVehicleLocations();
 
-    // Sonra interval ile devam et
-    const reload = setInterval(fetchVehicleLocations, timerInterval * 1000);
+    // Sonra interval ile devam et (timerInterval saniye cinsinden)
+    const reload = setInterval(refreshAndRebuild, timerInterval * 1000);
     return () => clearInterval(reload);
-  }, [isTimerLoaded, timerInterval]);
+  }, [isTimerLoaded, timerInterval, rebuildVehicleLocations]);
 
   const updateDisplayedLocations = useCallback(() => {
     let filteredVehicles = [...vehicles];

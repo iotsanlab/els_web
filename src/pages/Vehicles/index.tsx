@@ -117,25 +117,25 @@ const Vehicles = () => {
   const totalWorking30Days = getTotalFromAttributes("last30EngHours", allowedTypes);
   const oldWorking30Days = (getTotalFromAttributes("last60EngHours", allowedTypes) - getTotalFromAttributes("last30EngHours", allowedTypes));
 
-  const totalFuel30Days = getTotalFromAttributes("last30FuelCons", allowedTypes);
-  const oldFuel30Days = (getTotalFromAttributes("last60FuelCons", allowedTypes) - getTotalFromAttributes("last30FuelCons", allowedTypes));
+  const totalFuel30Days = deviceWorkStore.getSummaryBetweenDates("DailyEnergyConsumption", from30, now, allowedTypes);
+  const oldFuel30Days = deviceWorkStore.getSummaryBetweenDates("DailyEnergyConsumption", from60, from30, allowedTypes);
 
   const totalIdle30Days = deviceWorkStore.getSummaryBetweenDates("idleTime", from30, now, allowedTypes);
   const oldIdle30Days = deviceWorkStore.getSummaryBetweenDates("idleTime", from60, from30, allowedTypes);
 
-  const  { alarms } = useNotification({ pageSize: 500});
+  const { alarms } = useNotification({ pageSize: 500 });
 
   // Device data'yı güncelleme - daha stabil hale getirme
   useEffect(() => {
     if (!deviceAttributes.all || deviceAttributes.all.length === 0) return;
 
-    const filterAlarm = alarms.filter((alarm) => Number(alarm.alarmTypeId)>=7 && Number(alarm.alarmTypeId)<=14);
+    const filterAlarm = alarms.filter((alarm) => Number(alarm.alarmTypeId) >= 7 && Number(alarm.alarmTypeId) <= 14);
 
-    console.log(filterAlarm, 'filterAlarm',alarms);
-  
+    console.log(filterAlarm, 'filterAlarm', alarms);
+
     const mappedData: MachineProps[] = deviceAttributes.all.map(([id, attrs]) => {
       const getAttr = (key: string) => attrs.find(a => a.key === key)?.value ?? "";
-      
+
 
       const statValue = deviceStats[id];
       const isActive = parseActiveStatus(statValue);
@@ -165,7 +165,7 @@ const Vehicles = () => {
     });
 
     setOriginalDeviceData(mappedData.sort((a, b) => b.model.localeCompare(a.model)));
-    
+
     // Mevcut arama ve filtre durumunu koru
     if (searchText || selectedFilters.length > 0) {
       const lowerSearch = searchText.toLowerCase();
@@ -181,7 +181,7 @@ const Vehicles = () => {
     } else {
       setDeviceData(mappedData);
     }
-    
+
     setIsInitialDataLoaded(true);
   }, [deviceAttributes.all, deviceStats, parseActiveStatus, searchText, selectedFilters, alarms]);
 
@@ -210,12 +210,12 @@ const Vehicles = () => {
   const handleFilterChange = useCallback((filters: string[]) => {
     setSelectedFilters(filters);
     applyFiltersAndSearch(filters, searchText);
-    
+
     // Filter değiştiğinde map'i yeniden render et
     setMapKey(prev => prev + 1);
   }, [searchText, applyFiltersAndSearch]);
 
-  
+
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -300,7 +300,7 @@ const Vehicles = () => {
   // ServiceLocations - daha stabil ve performanslı hale getirme
   const serviceLocations = useMemo<ServiceLocation[]>(() => {
     if (!isInitialDataLoaded) return [];
-    
+
     const machines = machineStore.getAllMachines();
     if (machines.length === 0) return [];
 
@@ -309,13 +309,13 @@ const Vehicles = () => {
     const locations = machines
       .filter(machine => {
         // Geçerli koordinatlara sahip makineleri filtrele
-        const hasValidCoords = machine.lat && machine.long && 
-                              !isNaN(Number(machine.lat)) && 
-                              !isNaN(Number(machine.long));
-        
-        const matchesFilter = selectedFilters.length === 0 || 
-                             selectedFilters.includes(machine.subtype);
-        
+        const hasValidCoords = machine.lat && machine.long &&
+          !isNaN(Number(machine.lat)) &&
+          !isNaN(Number(machine.long));
+
+        const matchesFilter = selectedFilters.length === 0 ||
+          selectedFilters.includes(machine.subtype);
+
         return hasValidCoords && matchesFilter;
       })
       .map(machine => {
@@ -341,16 +341,16 @@ const Vehicles = () => {
     console.log('📍 ServiceLocations created:', locations.length, 'locations');
     return locations;
   }, [
-    machineStore.machines, 
-    selectedFilters, 
-    deviceStats, 
-    parseActiveStatus, 
+    machineStore.machines,
+    selectedFilters,
+    deviceStats,
+    parseActiveStatus,
     isInitialDataLoaded
   ]);
 
   useEffect(() => {
-  setMapKey(prev => prev + 1);
-}, [serviceLocations]);
+    setMapKey(prev => prev + 1);
+  }, [serviceLocations]);
 
   // Map marker click handler
   const handleMapMarkerClick = useCallback((id: number | string) => {
@@ -386,7 +386,7 @@ const Vehicles = () => {
           onFilterChange={handleFilterChange}
         />
         <div className="h-4" />
-{/* 
+        {/* 
 
 
         <InfoBar
@@ -410,7 +410,7 @@ const Vehicles = () => {
 
  */}
 
-         <InfoBar
+        <InfoBar
           weeklyData={{
             totalWorkTime: totalWorking7Days,
             oldWorkTime: oldWorking7Days,

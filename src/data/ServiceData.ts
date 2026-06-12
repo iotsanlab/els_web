@@ -281,7 +281,10 @@ const ServiceData = [
         long: "-1.246817",
         address: "1 Wrightson Cl, Sutton-in-Ashfield NG17 4LT, United Kingdom",
       }
-    ]
+    ],
+    get allServices() {
+      return [...this.localServices, ...this.abroadServices];
+    }
   },
 ];
 

@@ -68,24 +68,24 @@ const ManualBarChart = ({ sampleDataWeekly, sampleDataMonthly, title, type, onSe
 
 
     const handleBarHeight = (data: DataItem[], value: number, type: "blue" | "orange") => {
-    const maxContainerHeight = 160; // max bar yüksekliği
-    const minBarHeight = 4;        // en küçük bar (görünsün diye)
-    
-    const values = data.map(item => item.value);
-    const maxValue = Math.max(...values);
-    const minValue = Math.min(...values);
+        const maxContainerHeight = 160; // max bar yüksekliği
+        const minBarHeight = 6;        // en küçük bar (görünsün diye)
 
-    // Değer aralığı sabit değilse, normalize et
-    if (maxValue === 0) return minBarHeight;
+        if (value <= 0) return minBarHeight;
 
-    // Lineer normalize (0 - 1 arası)
-    const normalized = (value - minValue) / (maxValue - minValue);
+        const values = data.map(item => item.value).filter(v => v > 0);
+        if (values.length === 0) return minBarHeight;
 
-    // Nihai yükseklik
-    const barHeight = minBarHeight + normalized * (maxContainerHeight - minBarHeight);
-    
-    return Math.round(barHeight);
-};
+        const maxValue = Math.max(...values);
+        if (maxValue === 0) return minBarHeight;
+
+        // 0-tabanlı oransal ölçekleme (gerçek bar chart mantığı)
+        // Değer max'ın %50'siyse, bar da %50 yüksekliğinde olur
+        const ratio = value / maxValue;
+        const barHeight = minBarHeight + ratio * (maxContainerHeight - minBarHeight);
+
+        return Math.round(barHeight);
+    };
 
     return (
         <div className='flex relative flex-col w-[368px] h-[279px] bg-white dark:bg-gray10 items-start justify-between px-[20px]' >
@@ -107,31 +107,31 @@ const ManualBarChart = ({ sampleDataWeekly, sampleDataMonthly, title, type, onSe
                             {(() => {
                                 const minIdeal = machineCount * 6;
                                 const maxIdeal = machineCount * 7;
-                                const bottomPos = handleBarHeight(data, minIdeal, type) + 20 + 12;
-                                const topPos = handleBarHeight(data, maxIdeal, type) + 20 + 12;
+                                const bottomPos = 150;
+                                const topPos = 195;
                                 const bandHeight = topPos - bottomPos;
-                                
+
                                 return (
-                                    <div 
+                                    <div
                                         className="absolute left-0 right-0 z-10 pointer-events-none"
                                         style={{ bottom: `${bottomPos}px`, height: `${bandHeight}px` }}
                                     >
                                         {/* Üst çizgi */}
-                                        <div 
+                                        <div
                                             className="absolute top-0 left-0 right-0"
-                                            style={{ borderTop: '1.5px dashed rgba(20, 184, 166, 0.6)' }} 
+                                            style={{ borderTop: '1.5px dashed rgba(20, 184, 166, 0.6)' }}
                                         />
                                         {/* Arası - soft gradient band */}
-                                        <div 
+                                        <div
                                             className="absolute inset-0 rounded-sm"
-                                            style={{ 
+                                            style={{
                                                 background: 'linear-gradient(180deg, rgba(20, 184, 166, 0.12) 0%, rgba(20, 184, 166, 0.06) 50%, rgba(20, 184, 166, 0.12) 100%)',
-                                            }} 
+                                            }}
                                         />
                                         {/* Alt çizgi */}
-                                        <div 
+                                        <div
                                             className="absolute bottom-0 left-0 right-0"
-                                            style={{ borderTop: '1.5px dashed rgba(20, 184, 166, 0.6)' }} 
+                                            style={{ borderTop: '1.5px dashed rgba(20, 184, 166, 0.6)' }}
                                         />
                                     </div>
                                 );
@@ -139,7 +139,7 @@ const ManualBarChart = ({ sampleDataWeekly, sampleDataMonthly, title, type, onSe
                         </>
                     )
                 }
-                
+
                 <div
                     className={`flex items-end h-full justify-start ${data.length > 7 ? 'space-x-[12px]' : 'space-x-[22px]'} w-[328px] dark:bg-transparent overflow-x-auto cursor-grab`}
                     onMouseDown={handleMouseDown}
@@ -147,51 +147,51 @@ const ManualBarChart = ({ sampleDataWeekly, sampleDataMonthly, title, type, onSe
                     onMouseUp={handleMouseUp}
                     onMouseLeave={handleMouseUp}
                 >
-                {data.map((item, index) => (
-                    <div
-                        key={index}
-                        className='flex items-end justify-start h-full bg-white dark:bg-gray10'
-                        onMouseEnter={() => setHoveredBar(index)} // Hover işlemi
-                        onMouseLeave={() => setHoveredBar(null)}  // Hover çıkınca
-                    >
-                        <div className='flex flex-col items-center justify-end w-full h-full'>
+                    {data.map((item, index) => (
+                        <div
+                            key={index}
+                            className='flex items-end justify-start h-full bg-white dark:bg-gray10'
+                            onMouseEnter={() => setHoveredBar(index)} // Hover işlemi
+                            onMouseLeave={() => setHoveredBar(null)}  // Hover çıkınca
+                        >
+                            <div className='flex flex-col items-center justify-end w-full h-full'>
 
-                            <div
-                                className={`relative rounded-[4px] 
+                                <div
+                                    className={`relative rounded-[4px] 
                                         ${item.value < 0.01 ? 'border-[2px] border-gray2' : 'border-[0px]'} 
                                         ${item.value < 0.01 ? 'bg-gray1' : type === 'blue' ? 'bg-statusBlue' : 'bg-mstYellow'} 
                                         ${selectedOption == 1 ? 'w-4' : 'w-[28px]'}`}
-                                style={{
-                                    height: `${item.value < 0.01 ? 20 : handleBarHeight(data, item.value, type)}px`,
-                                }}
+                                    style={{
+                                        height: `${item.value < 0.01 ? 20 : handleBarHeight(data, item.value, type)}px`,
+                                    }}
 
-                            >
-                                {item.value > 0 &&
-                                <span
-                                    className="absolute -top-[20px] left-1/2 -translate-x-1/2 text-[12px] font-bold font-inter text-gray10 dark:text-white whitespace-nowrap select-none"
                                 >
-                                    {item.value < 1 ? item.value.toFixed(1) : item.value.toFixed(0)}
-                                </span>}
-                                {/* Tooltip: Hover edilince gösterilecek */}
-                                {hoveredBar === index && (
-                                    <div className={`absolute z-[9999] w-[60px] h-[30px] ${index == data.length - 1 ? "right-[0px]" : ""} ${data.length > 7 ? (index > 2 ? "right-[0px]" : "") : ''} items-center justify-center bg-gray2 text-gray10 text-xs rounded-[10px]`}>
-                                        <p className='flex items-center justify-center w-full h-full'>{`${item.value.toFixed(1)} ${type == "blue" ? t("global.kWh") : t("global.h")}`}</p>
-                                    </div>
-                                )}
-                            </div>
+                                    {item.value > 0 &&
+                                        <span
+                                            className="absolute -top-[20px] left-1/2 -translate-x-1/2 text-[12px] font-bold font-inter text-gray10 dark:text-white whitespace-nowrap select-none"
+                                        >
+                                            {item.value < 1 ? item.value.toFixed(1) : item.value.toFixed(0)}
+                                        </span>}
+                                    {/* Tooltip: Hover edilince gösterilecek */}
+                                    {hoveredBar === index && (
+                                        <div className={`absolute z-[9999] w-[60px] h-[30px] ${index == data.length - 1 ? "right-[0px]" : ""} ${data.length > 7 ? (index > 2 ? "right-[0px]" : "") : ''} items-center justify-center bg-gray2 text-gray10 text-xs rounded-[10px]`}>
+                                            <p className='flex items-center justify-center w-full h-full'>{`${item.value.toFixed(1)} ${type == "blue" ? t("global.kWh") : t("global.h")}`}</p>
+                                        </div>
+                                    )}
+                                </div>
 
-                            <div className='flex flex-col items-center justify-center mt-2'>
-                                <p className='text-xs font-bold text-gray6 font-inter' style={{ userSelect: 'none' }}>{t(`global.weekly_days.${item.dayName}`)}</p>
-                                <p className='text-xs font-bold text-gray10 dark:text-white font-inter' style={{ userSelect: 'none' }}>{item.dayNum == 0 ? " " : item.dayNum}</p>
+                                <div className='flex flex-col items-center justify-center mt-2'>
+                                    <p className='text-xs font-bold text-gray6 font-inter' style={{ userSelect: 'none' }}>{t(`global.weekly_days.${item.dayName}`)}</p>
+                                    <p className='text-xs font-bold text-gray10 dark:text-white font-inter' style={{ userSelect: 'none' }}>{item.dayNum == 0 ? " " : item.dayNum}</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ))}
+                    ))}
                 </div>
             </div>
-            
+
             {/* Legend - İdeal Tüketim çizgisi */}
-          
+
         </div>
     );
 };

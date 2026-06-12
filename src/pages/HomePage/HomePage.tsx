@@ -13,11 +13,11 @@ import getMachineImage from "../../components/GetImage";
 import deviceAttributes from "../../store/DeviceAttributes";
 import deviceWorkStore from "../../store/DeviceTelemetry";
 import { userStore } from "../../store/UserStore";
-import { getFavList, getRecentMachineList, getUserId } from "../../services/auth";
+import { getFavList, getRecentMachineList, getUserId, getTimerSetting } from "../../services/auth";
 import AiChatWidget from "../../components/AiChatWidget";
-import { refreshAllTelemetry } from "../../hooks/useDeviceInitialization";
+import { refreshStatusOnly } from "../../hooks/useDeviceInitialization";
 
-const allCheckedOptions = [ "AE15", "EL12", "VM6"];
+const allCheckedOptions = ["AE15", "EL12", "VM6"];
 
 interface FormattedData {
   value: number;
@@ -47,28 +47,49 @@ const HomePage: React.FC = () => {
 
   const [last7idle, setLast7Idle] = useState<number>(0);
   const [last30idle, setLast30Idle] = useState<number>(0);
-  
+
   const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
   const isRefreshing = useRef(false);
 
-  // Her saniye API'den veri çekerek chart datalarını güncellemek için interval
+  const [timerInterval, setTimerInterval] = useState<number | null>(null); // null = henüz yüklenmedi
+
+  // Timer ayarını kullanıcı tercihinden al
   useEffect(() => {
+    const fetchTimer = async () => {
+      try {
+        const uid = await getUserId();
+        if (!uid) return;
+        const timerValue = await getTimerSetting(uid);
+        setTimerInterval(timerValue ?? 30); // Varsayılan 30 saniye
+      } catch (error) {
+        console.error('Timer setting fetch error:', error);
+        setTimerInterval(30); // Hata durumunda 30 saniye
+      }
+    };
+    fetchTimer();
+  }, []);
+
+  // Sadece aktif/pasif durumu yenileyen hafif interval
+  useEffect(() => {
+    // Timer ayarı yüklenene kadar başlatma
+    if (timerInterval === null) return;
+
     const interval = setInterval(async () => {
       // Eğer zaten bir refresh işlemi devam ediyorsa, yeni istek atma
       if (isRefreshing.current) return;
-      
+
       isRefreshing.current = true;
       try {
-        await refreshAllTelemetry();
+        await refreshStatusOnly(); // Sadece stat (aktif/pasif) durumu çeker
         setRefreshTrigger(prev => prev + 1);
       } catch (error) {
-        console.error('Telemetry refresh failed:', error);
+        console.error('Status refresh failed:', error);
       } finally {
         isRefreshing.current = false;
       }
-    }, 5000);
+    }, timerInterval * 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [timerInterval]);
 
   //donut için yüzdelik hesaplama fonksiyonu
   function calculateWorkingPercentage(workingHour: number, idleHour: number): number {
@@ -114,7 +135,7 @@ const HomePage: React.FC = () => {
 
 
 
-//test commit
+  //test commit
 
 
 
@@ -124,60 +145,60 @@ const HomePage: React.FC = () => {
     setCheckedOptions(selected);
   };
 
- // subtype bazlı statik idle değerleri
-const weeklyIdleValues: Record<string, number> = {
-  AE15: 4.5,
-  EL12: 3.2,
-  VM6: 1.7,
-};
+  // subtype bazlı statik idle değerleri
+  const weeklyIdleValues: Record<string, number> = {
+    AE15: 4.5,
+    EL12: 3.2,
+    VM6: 1.7,
+  };
 
-// aylık statik idle değerleri (subtype bazlı)
-const monthlyIdleValues: Record<string, number> = {
-  AE15: 23.9,
-  EL12: 16.4,
-  VM6: 8.9,
-};
+  // aylık statik idle değerleri (subtype bazlı)
+  const monthlyIdleValues: Record<string, number> = {
+    AE15: 23.9,
+    EL12: 16.4,
+    VM6: 8.9,
+  };
 
-useEffect(() => {
-  const optionsToUse = checkedOptions.length > 0 ? checkedOptions : Object.keys(weeklyIdleValues);
-
-
-  const total30 = deviceWorkStore.getDailyFormatted("DailyPlatformHours", 31, optionsToUse)
-  const total7 = deviceWorkStore.getDailyFormatted("DailyPlatformHours", 7, optionsToUse)
-
-  const total30Working = total30.reduce((acc, item) => acc + item.value, 0);
-  const total7Working = total7.reduce((acc, item) => acc + item.value, 0);
-
-  setTotalWorkingHour(total30Working);
-  setLast7Working(total7Working);
+  useEffect(() => {
+    const optionsToUse = checkedOptions.length > 0 ? checkedOptions : Object.keys(weeklyIdleValues);
 
 
+    const total30 = deviceWorkStore.getDailyFormatted("DailyPlatformHours", 31, optionsToUse)
+    const total7 = deviceWorkStore.getDailyFormatted("DailyPlatformHours", 7, optionsToUse)
 
-  // haftalık idle
-  const idleTime = deviceWorkStore.getDailySummary("DailyGroundHours", 7, checkedOptions);
-  const idle7 = optionsToUse.reduce((acc, type) => acc + (weeklyIdleValues[type] || 0), 0);
-  setLast7Idle(idleTime);
+    const total30Working = total30.reduce((acc, item) => acc + item.value, 0);
+    const total7Working = total7.reduce((acc, item) => acc + item.value, 0);
 
-  // aylık idle
-  const idleTime30 = deviceWorkStore.getDailySummary("DailyGroundHours", 31, checkedOptions);
-  const idle30 = optionsToUse.reduce((acc, type) => acc + (monthlyIdleValues[type] || 0), 0);
-  setLast30Idle(idleTime30);
-
-  setWorkingBarChartWeekly(total7);
-  const rawWorking = total30;
-  const dummy30 = generateDummyChartData(31);
-  const completed = dummy30.map(d => {
-    const found = rawWorking.find(r => r.date === d.date);
-    return found ? found : d;
-  });
-  setWorkingBarChartMonthly(completed);
-  setFuelBarChartWeekly(deviceWorkStore.getDailyFormatted("DailyEnergyConsumption", 7, optionsToUse));
-  setFuelBarChartMonthly(deviceWorkStore.getDailyFormatted("DailyEnergyConsumption", 30, optionsToUse));
-}, [checkedOptions, deviceWorkStore.all.length, refreshTrigger]);
+    setTotalWorkingHour(total30Working);
+    setLast7Working(total7Working);
 
 
 
-{/* 
+    // haftalık idle
+    const idleTime = deviceWorkStore.getDailySummary("DailyGroundHours", 7, checkedOptions);
+    const idle7 = optionsToUse.reduce((acc, type) => acc + (weeklyIdleValues[type] || 0), 0);
+    setLast7Idle(idleTime);
+
+    // aylık idle
+    const idleTime30 = deviceWorkStore.getDailySummary("DailyGroundHours", 31, checkedOptions);
+    const idle30 = optionsToUse.reduce((acc, type) => acc + (monthlyIdleValues[type] || 0), 0);
+    setLast30Idle(idleTime30);
+
+    setWorkingBarChartWeekly(total7);
+    const rawWorking = total30;
+    const dummy30 = generateDummyChartData(31);
+    const completed = dummy30.map(d => {
+      const found = rawWorking.find(r => r.date === d.date);
+      return found ? found : d;
+    });
+    setWorkingBarChartMonthly(completed);
+    setFuelBarChartWeekly(deviceWorkStore.getDailyFormatted("DailyEnergyConsumption", 7, optionsToUse));
+    setFuelBarChartMonthly(deviceWorkStore.getDailyFormatted("DailyEnergyConsumption", 30, optionsToUse));
+  }, [checkedOptions, deviceWorkStore.all.length, refreshTrigger]);
+
+
+
+  {/* 
     useEffect(() => {
     const total30 = deviceWorkStore.getDailySummary("DailyWorkingHours", 31, checkedOptions);
     const idle30 = deviceWorkStore.getDailySummary("idleTime", 31, checkedOptions);
@@ -267,8 +288,8 @@ useEffect(() => {
     const justLoggedIn = localStorage.getItem("justLoggedIn");
 
     if (justLoggedIn === "true") {
-      localStorage.removeItem("justLoggedIn"); 
-      window.location.reload(); 
+      localStorage.removeItem("justLoggedIn");
+      window.location.reload();
     }
   }, []);
 
@@ -294,7 +315,7 @@ useEffect(() => {
           setRecentItems(mappedRecents);
         }
 
-         const favs = await getFavList(uid);
+        const favs = await getFavList(uid);
         if (!favs) return;
 
         const mapped = favs
@@ -312,7 +333,7 @@ useEffect(() => {
     };
 
     fetchData();
-  }, []); 
+  }, []);
 
 
   return (
@@ -349,7 +370,7 @@ useEffect(() => {
               <ManualBarChart
                 sampleDataWeekly={fuelBarChartWeekly.length > 0 ? fuelBarChartWeekly : generateDummyChartData(7)}
                 sampleDataMonthly={fuelBarChartMonthly.length > 0 ? fuelBarChartMonthly : generateDummyChartData(31)}
-                title={t("global.fuelGraphTitle") }
+                title={t("global.fuelGraphTitle")}
                 type="blue"
                 onSelectOption={setSelectedWorkOption}
                 selectedOption={selectedWorkOption}
@@ -368,7 +389,7 @@ useEffect(() => {
                 type="orange"
                 onSelectOption={setSelectedFuelOption}
                 selectedOption={selectedFuelOption}
-               
+
 
               />
 

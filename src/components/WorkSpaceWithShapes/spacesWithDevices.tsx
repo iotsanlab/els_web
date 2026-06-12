@@ -210,19 +210,19 @@ const SpacesWithDevices: React.FC<SpacesWithDevicesProps> = ({
         <div className="text-[20px] text-left text-gray4 font-bold mb-[5px]">
           {t("global.shapesWithDevicesTitle")}
         </div>
-       <div
-  onClick={() => {
-    console.log("Yeni Ekle butonuna tıklandı");
-    if (onStartPolygonDrawing) {
-      onStartPolygonDrawing();
-    } else {
-      console.warn("onStartPolygonDrawing fonksiyonu tanımlı değil");
-    }
-  }}
-  className="text-[16px] text-left text-gray4 font-medium mb-[15px] cursor-pointer select-none hover:text-gray10 dark:hover:text-white transition-colors"
->
-  {t("global.addNew")}
-</div>
+        <div
+          onClick={() => {
+            console.log("Yeni Ekle butonuna tıklandı");
+            if (onStartPolygonDrawing) {
+              onStartPolygonDrawing();
+            } else {
+              console.warn("onStartPolygonDrawing fonksiyonu tanımlı değil");
+            }
+          }}
+          className="text-[16px] text-left text-gray4 font-medium mb-[15px] cursor-pointer select-none hover:text-gray10 dark:hover:text-white transition-colors"
+        >
+          {t("global.addNew")}
+        </div>
 
         {/* Shape Listesi */}
         {shapeInfos.length === 0 ? (
@@ -246,8 +246,8 @@ const SpacesWithDevices: React.FC<SpacesWithDevicesProps> = ({
                   ></span>
                   <span
                     className={`text-[16px] ${shapeInfo.visible
-                        ? "text-gray10 dark:text-white font-bold"
-                        : "text-gray4 font-medium"
+                      ? "text-gray10 dark:text-white font-bold"
+                      : "text-gray4 font-medium"
                       }`}
                   >
                     {shapeInfo.name}
@@ -394,7 +394,7 @@ const SpacesWithDevices: React.FC<SpacesWithDevicesProps> = ({
               Tüm makineler çalışma alanlarına atanmış
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-2 overflow-auto max-h-[500px]">
               {unassignedMachines.map((machine) => (
                 <div
                   key={machine.id}

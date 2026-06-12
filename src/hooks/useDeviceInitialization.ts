@@ -14,6 +14,7 @@ import { IAssetResponse } from '../models/assets';
 import { userStore } from '../store/UserStore';
 
 const BATCH_SIZE = 500;
+const BATCH_SIZE_LIGHT = 50; // Daha küçük batch boyutu - hafif sorgular için
 
 const TELEMETRY_KEYS = {
   daily: ['DailyWorkingHours', 'DailyFuelCons', 'idleTime', 'ECOHOUR1Daily', 'STDHOUR1Daily', 'PWRHOUR1Daily', 'PWR_PLUSHOUR1Daily', 'DailyIdleHours', 'last30EngHours', 'last30FuelCons', 'last60EngHours', 'last60FuelCons', 'last14IdleHours', 'last7IdleHours', 'DailyEnergyConsumption', 'DailyPlatformHours','DailyGroundHours'],
@@ -235,5 +236,37 @@ export async function refreshAllTelemetry(): Promise<void> {
     }
   } catch (error) {
     console.error('Telemetry refresh error:', error);
+  }
+}
+
+// Hafif standalone fonksiyon - sadece aktif/pasif durumu (stat) yeniler
+// HomePage gibi sadece durum bilgisi gereken sayfalar için optimize edildi
+export async function refreshStatusOnly(): Promise<void> {
+  const deviceList = allDevices.all;
+  if (!deviceList.length) return;
+
+  try {
+    const batches = createBatches(deviceList, BATCH_SIZE_LIGHT);
+
+    for (const batch of batches) {
+      const statusResults = await Promise.all(
+        batch.map(async (device) => {
+          const status = await getValuesTimeSeries(
+            device.entityType,
+            device.id,
+            ['stat'] // Sadece aktif/pasif durumu
+          );
+          return { id: device.id, status };
+        })
+      );
+
+      statusResults.forEach(({ id, status }) => {
+        if (status?.stat) {
+          deviceWorkStore.setTelemetry(id, 'stat', status.stat);
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Status refresh error:', error);
   }
 }

@@ -381,7 +381,7 @@ interface DrawingManagerControlProps {
   
     useEffect(() => {
       if (prevIsEditMode.current === true && isEditMode === false) {
-        const entityType = userStore.getEntityType() || "DEVICE";
+        const entityType = (userStore as any).entityType || "DEVICE";
   
         const updatedShapeData = shapeInfos.map((shape) => {
           let coordinates;
