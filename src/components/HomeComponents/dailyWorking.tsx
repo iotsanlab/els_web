@@ -3,10 +3,21 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 import { useTranslation } from 'react-i18next';
 import { useDarkMode } from '../../context/DarkModeContext';
 
-const DailyWorking: React.FC = () => {
+interface DailyWorkingData {
+    date: string;
+    hours: number;
+}
+
+interface Props {
+    data?: DailyWorkingData[];
+}
+
+const DailyWorking: React.FC<Props> = ({ data: propData }) => {
     const { t } = useTranslation();
     const { isDarkMode } = useDarkMode();
-    const data = [
+
+    // Prop'tan veri gelmediyse statik veri kullan
+    const data = propData && propData.length > 0 ? propData : [
         { date: '01.02.2025', hours: 4.70 },
         { date: '02.02.2025', hours: 4.80 },
         { date: '03.02.2025', hours: 6.20 },
@@ -15,6 +26,9 @@ const DailyWorking: React.FC = () => {
         { date: '06.02.2025', hours: 6.20 },
         { date: '07.02.2025', hours: 4.40 },
     ];
+
+    const maxHours = Math.max(...data.map(d => d.hours), 10);
+    const yMax = Math.ceil(maxHours / 2) * 2; // 2'nin katlarına yuvarla
 
     return (
         <div className="w-full h-full items-start justify-start p-4 flex flex-col bg-white dark:bg-gray10 border-[0.5px] border-gray2 dark:border-gray9 rounded-xl">
@@ -45,7 +59,7 @@ const DailyWorking: React.FC = () => {
                             />
 
                             <YAxis
-                                domain={[0, 10]}
+                                domain={[0, yMax]}
                                 tick={{ fill: isDarkMode ? '#8B96A2' : '#8B96A2' }}
                                 axisLine={{ stroke: isDarkMode ? '#424D57' : '#E5E8EB' }}
                             />

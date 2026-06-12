@@ -143,6 +143,7 @@
     "online": "Çevrimiçi",
     "offline": "Çevrimdışı",
     "platform": "Platform",
+    "ground": "Yer",
     "energyConsumptionTrend": "Enerji Tüketimi Trend Grafiği",
     "currentSOC": "Mevcut SOC (%)",
     "overallBatteryHealth": "Genel Batarya Sağlığı",
@@ -169,7 +170,7 @@
     "filterAcknowledged": "Onaylanmış Bildirimler",
     "filterUnacknowledged": "Onaylanmamış Bildirimler",
     "acknowledge": "Bildirim Onayla",
-    "acknowledged": "Bildirim Onaylandı",  
+    "acknowledged": "Bildirim Onaylandı",
     "ackSuccess": "Bildirim başarıyla onaylandı",
     "ackError": "Onaylama sırasında hata oluştu",
     "ackAllBtn": "Tüm Bildirimleri Onayla",
@@ -297,7 +298,15 @@
     "summaryWidget": {
       "fuel": "Tüketilen Enerji",
       "workTime": "Çalışma Süresi",
-      "days": ["Pt", "Sa", "Ça", "Pe", "Cu", "Ct", "Pa"],
+      "days": [
+        "Pt",
+        "Sa",
+        "Ça",
+        "Pe",
+        "Cu",
+        "Ct",
+        "Pa"
+      ],
       "time": "Haftalık",
       "labels": {
         "fuel": "Yakıt",
@@ -472,7 +481,11 @@
       "fax": "Faks",
       "mail": "E-mail",
       "web": "Web Sitesi",
-      "machines": ["Telehandler", "Ekskavator", "Bekoloader"]
+      "machines": [
+        "Telehandler",
+        "Ekskavator",
+        "Bekoloader"
+      ]
     }
   },
   "documentPage": {

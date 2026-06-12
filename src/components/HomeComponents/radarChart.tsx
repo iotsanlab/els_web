@@ -3,10 +3,21 @@ import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadius
 import { useTranslation } from 'react-i18next';
 import { useDarkMode } from '../../context/DarkModeContext';
 
-const ChargingPatternChart: React.FC = () => {
+interface ChargingData {
+    hour: string;
+    value: number;
+}
+
+interface Props {
+    data?: ChargingData[];
+}
+
+const ChargingPatternChart: React.FC<Props> = ({ data: propData }) => {
     const { t } = useTranslation();
     const { isDarkMode } = useDarkMode();
-    const data = [
+
+    // Prop'tan veri gelmediyse statik veri kullan
+    const data = propData && propData.length > 0 ? propData : [
         { hour: '0', value: 15 },
         { hour: '1', value: 12 },
         { hour: '2', value: 8 },
@@ -33,6 +44,9 @@ const ChargingPatternChart: React.FC = () => {
         { hour: '23', value: 15 },
     ];
 
+    const maxValue = Math.max(...data.map(d => d.value), 20);
+    const radarMax = Math.ceil(maxValue / 5) * 5; // 5'in katlarına yuvarla
+
     const brandColor = isDarkMode ? "#e12627" : "#e12627";
 
     return (
@@ -53,7 +67,7 @@ const ChargingPatternChart: React.FC = () => {
                         />
                         <PolarRadiusAxis
                             angle={30}
-                            domain={[0, 20]}
+                            domain={[0, radarMax]}
                             tick={{ fill: isDarkMode ? '#A2ADB9' : '#5D6974', fontSize: 10 }}
                             axisLine={{ stroke: isDarkMode ? '#424D57' : '#E5E8EB' }}
                         />
@@ -80,4 +94,4 @@ const ChargingPatternChart: React.FC = () => {
     );
 };
 
-export default ChargingPatternChart; 
+export default ChargingPatternChart;

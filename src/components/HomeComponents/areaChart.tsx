@@ -3,11 +3,21 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tool
 import { useTranslation } from 'react-i18next';
 import { useDarkMode } from '../../context/DarkModeContext';
 
-const EnergyConsumptionChart: React.FC = () => {
+interface EnergyData {
+    date: string;
+    value: number;
+}
+
+interface Props {
+    data?: EnergyData[];
+}
+
+const EnergyConsumptionChart: React.FC<Props> = ({ data: propData }) => {
     const { t } = useTranslation();
     const { isDarkMode } = useDarkMode();
 
-    const data = [
+    // Prop'tan veri gelmediyse statik veri kullan
+    const data = propData && propData.length > 0 ? propData : [
         { date: '01-02-2025', value: 2 },
         { date: '02-02-2025', value: 10.6 },
         { date: '03-02-2025', value: 14.9 },
@@ -17,7 +27,13 @@ const EnergyConsumptionChart: React.FC = () => {
         { date: '07-02-2025', value: 11.4 },
     ];
 
-    const averageValue = 10.8; // Kesikli çizgi için ortalama değer
+    const averageValue = data.length > 0
+        ? parseFloat((data.reduce((sum, d) => sum + d.value, 0) / data.length).toFixed(1))
+        : 10.8;
+
+    const maxValue = Math.max(...data.map(d => d.value), 16);
+    const yMax = Math.ceil(maxValue / 4) * 4; // 4'ün katlarına yuvarla
+
     const brandColor = isDarkMode ? "#e12627" : "#e12627";
 
     return (
@@ -41,7 +57,7 @@ const EnergyConsumptionChart: React.FC = () => {
                             axisLine={{ stroke: isDarkMode ? '#424D57' : '#E5E8EB' }}
                         />
                         <YAxis
-                            domain={[0, 16]}
+                            domain={[0, yMax]}
                             tick={{ fill: isDarkMode ? '#A2ADB9' : '#5D6974', fontSize: 12 }}
                             axisLine={{ stroke: isDarkMode ? '#424D57' : '#E5E8EB' }}
                         />

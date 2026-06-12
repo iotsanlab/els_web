@@ -7,7 +7,7 @@ import DailyWorking from "../../components/HomeComponents/dailyWorking";
 import EnergyConsumptionChart from "../../components/HomeComponents/areaChart";
 import ChargingPatternChart from '../../components/HomeComponents/radarChart';
 import { getDevices } from "../../services/devices";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { getValuesAttributes, getValuesTimeSeries } from "../../services/telemetry";
 import GeneralTitle from "../../components/GeneralTitle";
 import deviceAttributes from "../../store/DeviceAttributes";
@@ -21,18 +21,61 @@ export enum MachineType {
     AE15 = "AE15",
     EL12 = "EL12",
     VM6 = "VM6",
-  } 
+}
 
-const warningList = [
-  { code: "101", description: "SPN - FMI", details: "4326354-5" },
-  { code: "89", description: "SPN - FMI", details: "4326354-5" },
-  { code: "77", description: "SPN - FMI", details: "4326354-5" },
-  { code: "408", description: "SPN - FMI", details: "4326354-5" }
+// ELS telemetry key'leri (parametre listesinden)
+const ELS_TELEMETRY_KEYS = [
+  "AlarmCoding",
+  "Ampere",
+  "BatteryLevel",
+  "ChargerNODE",
+  "ChargingPhase",
+  "Current",
+  "DisplayAlarmCode",
+  "FlashCode",
+  "Height",
+  "Load",
+  "latitude",
+  "longitude",
+  "PlatformMODE",
+  "stat",
+  "Temperature",
+  "TILTY",
+  "TILTX",
+  "Voltage",
+  "WorkingHours",
+  "speed",
+  "TotalEnergyConsumption",
 ];
 
+// Günlük ve hesaplanan telemetri key'leri (time series - tarih aralıklı)
+const ELS_DAILY_KEYS = [
+  "DailyWorkingHours",
+  "DailyEnergyConsumption",
+  "DailyPlatformHours",
+  "DailyGroundHours",
+];
+
+// Attribute olarak saklanan değerler
+const ELS_ATTRIBUTE_KEYS = [
+  "CumulativeCharge",
+  "ChargingCycle",
+  "RemainingChargingCycle",
+  "Brand",
+  "Imei",
+  "SIM",
+  "Tel",
+  "Type",
+  "Model",
+  "Subtype",
+  "SeriNo",
+  "opName",
+  "deviceName",
+  "isTelehandlerV2Image",
+];
 
 interface Device {
-  id: { id: string };
+  id: { id: string; entityType: string };
   name: string;
   type: string;
   label: string;
@@ -40,38 +83,35 @@ interface Device {
 }
 
 const BatteryHealtyPage = () => {
-    const { id } = useParams();
-    const { t } = useTranslation();
-  const [devices, setDevices] = useState<Device[]>([]);
+  const { id } = useParams();
+  const { t } = useTranslation();
   const [vehicleID, setVehicleID] = useState<any>();
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [fetchedDeviceAttributes, setFetchedDeviceAttributes] = useState<Record<string, string>>({}); // Attribute'leri saklayan state
-  const [deviceTelemetry, setDeviceTelemetry] = useState<Record<string, string>>({});
   const [vehicle, setVehicle] = useState<any>();
+  const [deviceTelemetry, setDeviceTelemetry] = useState<Record<string, any>>({});
+  const [deviceDailyData, setDeviceDailyData] = useState<Record<string, any[]>>({});
+  const [deviceAttrs, setDeviceAttrs] = useState<Record<string, string>>({});
+  const [chargingPatternData, setChargingPatternData] = useState<any[]>([]);
 
-
-  const { alarms: vehicleAlarms, isLoading: isVehicleAlarmsLoading } = useNotification({
+  const { alarms: vehicleAlarms } = useNotification({
     autoRefresh: true,
     pageSize: 100,
     deviceId: vehicleID
   });
 
-
   const machineList = deviceAttributes.all;
 
-  const getTimestamp = (daysAgo, endOfDay = false) => {
+  const getTimestamp = (daysAgo: number, endOfDay = false) => {
     const date = new Date();
     date.setDate(date.getDate() - daysAgo);
     date.setHours(endOfDay ? 23 : 0, endOfDay ? 59 : 0, endOfDay ? 59 : 0, 999);
     return date.getTime();
   };
 
+  // Store'dan cihaz bilgilerini al
   useEffect(() => {
     if (!id) return;
 
     const selectedEntry = machineList.find(([machineId]) => machineId === id);
-   
     if (!selectedEntry) return;
 
     const [deviceId, attrs] = selectedEntry;
@@ -97,130 +137,226 @@ const BatteryHealtyPage = () => {
     setVehicle(singleMapped);
     setVehicleID(id);
   }, [id, machineList]);
-  
- useEffect(() => {
-  const start = getTimestamp(6, false); // 6 gün önce, günün başlangıcı (00:00:00)
-  const end = getTimestamp(0, true);  // Bugünün sonu (23:59:59)
-  
-  console.log("Start:", start);
-  console.log("End:", end);
- },[]);
 
-  const fetchDevices = async () => {
-    try {
-      const response = await getDevices();
-      setDevices(response.data);
-
-      //setDevices(data);
-    } catch (err) {
-      setError("Veri çekilirken hata oluştu.");
-      console.log("error -> ", error)
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Cihaz telemetri verilerini çek (anlık değerler)
   useEffect(() => {
-    fetchDevices();
-  }, []);
+    if (!id) return;
 
+    const fetchTelemetry = async () => {
+      try {
+        const response = await getValuesTimeSeries("DEVICE", id, ELS_TELEMETRY_KEYS);
 
+        // Her key için en güncel değeri al
+        const formatted: Record<string, any> = {};
+        Object.keys(response).forEach((key) => {
+          const latestData = response[key]?.[0];
+          if (latestData) {
+            formatted[key] = latestData.value;
+          }
+        });
 
+        setDeviceTelemetry(formatted);
+      } catch (error) {
+        console.error("Telemetry fetch error:", error);
+      }
+    };
 
-  const fetchDeviceDetails = async (entityType: string, entityId: string) => {
-    try {
-      const response = await getValuesAttributes(entityType, entityId, [
-        "Brand",
-        "Imei",
-        "SIM",
-        "Tel",
-        "Type",
-      ]);
+    fetchTelemetry();
+  }, [id]);
 
-      console.log("Fetched Attributes ->", response);
+  // Günlük verileri çek (son 7 gün - time series)
+  useEffect(() => {
+    if (!id) return;
 
-      // API yanıtını key-value formatına çevirip kaydedelim
-      const formattedAttributes = response.reduce((acc: Record<string, string>, item: { key: string; value: string }) => {
-        acc[item.key] = item.value;
-        return acc;
-      }, {});
+    const fetchDailyData = async () => {
+      try {
+        const startDate = getTimestamp(6, false);
+        const endDate = getTimestamp(0, true);
 
-      setFetchedDeviceAttributes(formattedAttributes);
-    } catch (error) {
-      console.error(`Error fetching details for device ${entityId}:`, error);
-    }
-  };
+        const response = await getValuesTimeSeries(
+          "DEVICE", id, ELS_DAILY_KEYS,
+          startDate, endDate, true // daily=true → MAX aggregation, 86400000ms interval
+        );
 
-  const fetchDeviceTelemetry = async (entityType: string, entityId: string) => {
-    try {
-      const response = await getValuesTimeSeries(entityType, entityId, [
-        "AlarmCoding",
-        "Ampere",
-        "BatteryLevel",
-        "ChargerNODE",
-        "ChargingPhase",
-        "Current",
-        "DisplayAlarmCode",
-        "FlashCode",
-        "Load",
-        "latitude",
-        "longitude",
-        "PlatformMODE",
-        "stat", //terminal status 0
-        "Temperature",
-        "TILTY",
-        "TILTX",
-        "Voltage",
-        "WorkingHours",
-      ]);
+        setDeviceDailyData(response);
+      } catch (error) {
+        console.error("Daily data fetch error:", error);
+      }
+    };
 
-      console.log("Fetched Telemetry Response ->", response);
+    fetchDailyData();
+  }, [id]);
 
-      // API'den gelen veriyi `key-value` formatına dönüştürelim
-      const formattedTelemetry = Object.keys(response).reduce((acc: Record<string, string>, key: string) => {
-        const latestData = response[key]?.[0]; // En güncel (ilk) veriyi al
-        if (latestData) {
-          acc[key] = latestData.value; // Sadece "value" bilgisini al
+  // Attribute'leri çek (CumulativeCharge, ChargingCycle vb.)
+  useEffect(() => {
+    if (!id) return;
+
+    const fetchAttributes = async () => {
+      try {
+        const response = await getValuesAttributes("DEVICE", id, ELS_ATTRIBUTE_KEYS);
+
+        const formatted = response.reduce(
+          (acc: Record<string, string>, item: { key: string; value: string }) => {
+            acc[item.key] = item.value;
+            return acc;
+          }, {}
+        );
+
+        setDeviceAttrs(formatted);
+      } catch (error) {
+        console.error("Attributes fetch error:", error);
+      }
+    };
+
+    fetchAttributes();
+  }, [id]);
+
+  // Şarj deseni verilerini çek
+  useEffect(() => {
+    if (!id) return;
+
+    const fetchChargingPattern = async () => {
+      try {
+        const response = await getValuesTimeSeries("DEVICE", id, ["chargingPattern"]);
+
+        if (response?.chargingPattern && response.chargingPattern.length > 0) {
+          // chargingPattern verisi varsa parse et
+          const patternValue = response.chargingPattern[0]?.value;
+          if (patternValue) {
+            try {
+              const parsed = typeof patternValue === 'string' ? JSON.parse(patternValue) : patternValue;
+              if (Array.isArray(parsed)) {
+                setChargingPatternData(parsed);
+              }
+            } catch {
+              // JSON parse başarısızsa statik veri kullanılır
+            }
+          }
         }
-        return acc;
-      }, {});
+      } catch (error) {
+        console.error("Charging pattern fetch error:", error);
+      }
+    };
 
-      console.log("Formatted Telemetry ->", formattedTelemetry);
-      setDeviceTelemetry(formattedTelemetry);
-    } catch (error) {
-      console.error(`Error fetching telemetry for device ${entityId}:`, error);
-    }
-  };
+    fetchChargingPattern();
+  }, [id]);
 
+  // ─── Dashboard Card Items ───
+  const batteryLevel = deviceTelemetry.BatteryLevel;
+  const statValue = deviceTelemetry.stat;
+  const workingHours = deviceTelemetry.WorkingHours;
+  const rssiValue = deviceTelemetry.RSSI;
 
+  // Attribute'lerden gelen değerler (yoksa statik)
+  const cumulativeCharge = deviceAttrs.CumulativeCharge || "320";
+  const chargingCycle = deviceAttrs.ChargingCycle || "230";
+  const remainingChargingCycle = deviceAttrs.RemainingChargingCycle || "230";
 
-  useEffect(() => {
-    if (devices.length > 0) {
-      console.log("Devices[0] ->", devices[0].id.id, devices[0].id.entityType);
-      fetchDeviceDetails(devices[0].id.entityType, devices[0].id.id);
-      fetchDeviceTelemetry(devices[0].id.entityType, devices[0].id.id);
-
-    }
-  }, [devices]); // devices güncellendiğinde tetiklenir
-
-
+  // Ortalama günlük çalışma hesapla
+  const avgDailyWorking = useMemo(() => {
+    const daily = deviceDailyData?.DailyWorkingHours;
+    if (!daily || daily.length === 0) return "230";
+    const total = daily.reduce((sum: number, d: any) => sum + parseFloat(d.value || 0), 0);
+    return (total / daily.length).toFixed(1);
+  }, [deviceDailyData]);
 
   const items = [
-    { title: t("batteryHealthPage.terminalStatus"), desc: deviceTelemetry.stat == "0" ? t("batteryHealthPage.offline") : t("batteryHealthPage.online") },
-    { title: t("batteryHealthPage.deviceSignal"), desc: "", isPercentage: true, percentageValue: 60 },
-    { title: t("batteryHealthPage.totalWorkingHours"), desc: parseFloat(deviceTelemetry.WorkingHours).toFixed(1) },
-    { title: t("batteryHealthPage.cumulativeCharge"), desc: "320" },
-    { title: t("batteryHealthPage.chargingCycle"), desc: "230" },
-    { title: t("batteryHealthPage.remainingChargingCycle"), desc: "230" },
-    { title: t("batteryHealthPage.aveDailyWorkingHours"), desc: "230" },
-    { title: t("batteryHealthPage.accumulatedWorkingHours"), desc: "230" }
+    {
+      title: t("batteryHealthPage.terminalStatus"),
+      desc: statValue == null ? "-" : (Number(statValue) === 0 ? t("batteryHealthPage.offline") : t("batteryHealthPage.online"))
+    },
+    {
+      title: t("batteryHealthPage.deviceSignal"),
+      desc: "",
+      isPercentage: true,
+      percentageValue: rssiValue != null ? Number(rssiValue) : 60
+    },
+    {
+      title: t("batteryHealthPage.totalWorkingHours"),
+      desc: workingHours != null ? parseFloat(workingHours).toFixed(1) : "-"
+    },
+    {
+      title: t("batteryHealthPage.cumulativeCharge"),
+      desc: cumulativeCharge
+    },
+    {
+      title: t("batteryHealthPage.chargingCycle"),
+      desc: chargingCycle
+    },
+    {
+      title: t("batteryHealthPage.remainingChargingCycle"),
+      desc: remainingChargingCycle
+    },
+    {
+      title: t("batteryHealthPage.aveDailyWorkingHours"),
+      desc: avgDailyWorking
+    },
+    {
+      title: t("batteryHealthPage.accumulatedWorkingHours"),
+      desc: workingHours != null ? parseFloat(workingHours).toFixed(0) : "230"
+    }
   ];
 
-  useEffect(() => {
-    console.log("telemetsry -> ", JSON.stringify(deviceTelemetry.PlatformMODE))
-  }, [deviceTelemetry]);
+  // ─── BatteryHealth Props ───
+  const batterySOC = batteryLevel != null ? parseFloat(batteryLevel).toFixed(2) : "96.40";
+  const batteryHealthPercent = batteryLevel != null ? Math.min(100, Math.round(parseFloat(batteryLevel))).toString() : "98";
 
+  // ─── WeighLoad Props ───
+  const loadValue = deviceTelemetry.Load != null ? Number(deviceTelemetry.Load) : 48;
+  const platformMode = deviceTelemetry.PlatformMODE;
+  const heightValue = deviceTelemetry.Height;
+  const speedValue = deviceTelemetry.speed;
 
+  const platformModeText = useMemo(() => {
+    if (platformMode == null) return t("batteryHealthPage.platform");
+    return Number(platformMode) === 1 ? t("batteryHealthPage.platform") : t("batteryHealthPage.ground");
+  }, [platformMode, t]);
+
+  const heightText = heightValue != null ? `${parseFloat(heightValue).toFixed(0)}%` : "3''";
+  const speedText = speedValue != null ? `${parseFloat(speedValue).toFixed(1)} km/h` : "0 mph";
+
+  // ─── DailyWorking Chart Data ───
+  const dailyWorkingChartData = useMemo(() => {
+    const daily = deviceDailyData?.DailyWorkingHours;
+    if (!daily || daily.length === 0) return undefined; // undefined → component statik veri kullanır
+
+    return daily.map((entry: any) => {
+      const date = new Date(entry.ts);
+      return {
+        date: date.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+        hours: parseFloat(parseFloat(entry.value || 0).toFixed(2)),
+      };
+    }).sort((a: any, b: any) => {
+      // Tarihe göre sırala
+      const [dA, mA, yA] = a.date.split('.');
+      const [dB, mB, yB] = b.date.split('.');
+      return new Date(`${yA}-${mA}-${dA}`).getTime() - new Date(`${yB}-${mB}-${dB}`).getTime();
+    });
+  }, [deviceDailyData]);
+
+  // ─── EnergyConsumption Chart Data ───
+  const energyConsumptionChartData = useMemo(() => {
+    const daily = deviceDailyData?.DailyEnergyConsumption;
+    if (!daily || daily.length === 0) return undefined;
+
+    return daily.map((entry: any) => {
+      const date = new Date(entry.ts);
+      return {
+        date: date.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+        value: parseFloat(parseFloat(entry.value || 0).toFixed(2)),
+      };
+    }).sort((a: any, b: any) => {
+      const [dA, mA, yA] = a.date.split('.');
+      const [dB, mB, yB] = b.date.split('.');
+      return new Date(`${yA}-${mA}-${dA}`).getTime() - new Date(`${yB}-${mB}-${dB}`).getTime();
+    });
+  }, [deviceDailyData]);
+
+  // ─── ChargingPattern Radar Data ───
+  const chargingRadarData = useMemo(() => {
+    if (chargingPatternData.length > 0) return chargingPatternData;
+    return undefined; // undefined → component statik veri kullanır
+  }, [chargingPatternData]);
 
   return (
     <div className="flex w-full h-full grid-cols-12 overflow-none ">
@@ -251,48 +387,11 @@ const BatteryHealtyPage = () => {
         saseNo={vehicle?.SeriNo || "-"}
         type={vehicle?.type || ""}
         warnings={[]}
-        deviceWarnings={vehicleAlarms.filter((alarm) => alarm.subtype !== "Develon" || alarm.cleared !== true || alarm.acknowledged !== true)} // ✅ Yeni prop
+        deviceWarnings={vehicleAlarms.filter((alarm) => alarm.subtype !== "Develon" || alarm.cleared !== true || alarm.acknowledged !== true)}
         deviceName={vehicle?.deviceName}
       />
 
-
-      
-      
-     
-   
-    {/* 
-     
-      <div className="bg-gray-300 p-4 rounded-lg">
-        <h3 className="text-lg font-semibold">Cihaz Bilgileri</h3>
-        <ul>
-          {Object.entries(fetchedDeviceAttributes).map(([key, value]) => (
-            <li key={key}>
-              <strong>{key}:</strong> {value}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="bg-gray-300 p-4 rounded-lg">
-        <h3 className="text-lg font-semibold">Anlık Cihaz Verileri</h3>
-        <ul>
-          {Object.entries(deviceTelemetry).map(([key, value]) => (
-            <li key={key}>
-              <strong>{key}:</strong> {value}
-            </li>
-          ))}
-        </ul>
-      </div>
-      
-      */}
-      
-      
-
-
-
       <div className="flex flex-col w-full h-full items-center justify-center">
-
-
         <div className="flex-1 overflow-y-auto overflow-x-hidden">
           <div className="flex flex-wrap gap-6 p-6 min-w-[1200px]">
             <div className="flex flex-col w-full">
@@ -303,28 +402,30 @@ const BatteryHealtyPage = () => {
                   <DashboardCard title={t("batteryHealthPage.systemDashboard")} items={items} />
                 </div>
                 <div className="h-[500px] w-[calc(33.333%_-_1rem)] flex items-center justify-center">
-                  <BatteryHealth val1="96.40" val2="98" />
+                  <BatteryHealth val1={batterySOC} val2={batteryHealthPercent} />
                 </div>
                 <div className="h-[500px] w-[calc(33.333%_-_1rem)] flex items-center justify-center">
-                  <WeighLoad value={48} desc1={t("batteryHealthPage.platform")} desc2="3''" desc3="0 mph" />
+                  <WeighLoad
+                    value={loadValue}
+                    desc1={platformModeText}
+                    desc2={heightText}
+                    desc3={speedText}
+                  />
                 </div>
               </div>
             </div>
 
-
-
             <div className="flex flex-col w-full">
               <GeneralTitle title={t("batteryHealthPage.charts")} />
               <div className="flex items-center justify-between mt-2 gap-6">
-
                 <div className="h-[500px] w-[calc(33.333%_-_1rem)] flex items-center justify-center">
-                  <DailyWorking />
+                  <DailyWorking data={dailyWorkingChartData} />
                 </div>
                 <div className="h-[500px] w-[calc(33.333%_-_1rem)] flex items-center justify-center">
-                  <EnergyConsumptionChart />
+                  <EnergyConsumptionChart data={energyConsumptionChartData} />
                 </div>
                 <div className="h-[500px] w-[calc(33.333%_-_1rem)] flex items-center justify-center">
-                  <ChargingPatternChart />
+                  <ChargingPatternChart data={chargingRadarData} />
                 </div>
               </div>
             </div>

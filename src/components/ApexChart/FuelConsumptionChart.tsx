@@ -45,10 +45,10 @@ const FuelConsumptionChart: React.FC<FuelConsumptionData> = ({
   const [scrollLeft, setScrollLeft] = useState(0);
 
   const getMaxValueFromSeries = (series: FuelConsumptionData["series"]): number => {
-  const allValues = series.flatMap(s => s.data.map(d => typeof d === "number" ? d : d?.y ?? 0));
-  const maxVal = Math.max(...allValues, 0);
-  return Math.max(10, maxVal+4);
-};
+    const allValues = series.flatMap(s => s.data.map(d => typeof d === "number" ? d : d?.y ?? 0));
+    const maxVal = Math.max(...allValues, 0);
+    return Math.max(10, maxVal + 4);
+  };
 
 
   const [state, setState] = React.useState<{
@@ -77,9 +77,8 @@ const FuelConsumptionChart: React.FC<FuelConsumptionData> = ({
           if (data?.actualValue === 0) return '';
 
           return `<ul class="list-none p-1 bg-white dark:bg-gray10 dark:text-white rounded-md border-none">
-      <li><b>${name}</b>: ${data.actualValue} ${
-        isTooltipText ? isFuel == true ? t("global.kWh") : t("global.h") : ""
-      } </li>
+      <li><b>${name}</b>: ${data.actualValue} ${isTooltipText ? isFuel == true ? t("global.kWh") : t("global.h") : ""
+            } </li>
     </ul>`;
         }
       },
@@ -185,7 +184,7 @@ const FuelConsumptionChart: React.FC<FuelConsumptionData> = ({
           },
           style: {
             fontSize: days.length > 10 ? "8px" : "10px",
-                colors: '#A8A29E'
+            colors: '#A8A29E'
 
           },
         },
@@ -220,70 +219,70 @@ const FuelConsumptionChart: React.FC<FuelConsumptionData> = ({
   });
 
   // Dark mode değiştiğinde chart'ı güncelle
-useEffect(() => {
-  const calculatedMax = getMaxValueFromSeries(series); // buradan max hesaplıyoruz
+  useEffect(() => {
+    const calculatedMax = getMaxValueFromSeries(series); // buradan max hesaplıyoruz
 
-  setState(prevState => ({
-    ...prevState,
-    series: series,
-    options: {
-      ...prevState.options,
-      grid: {
-        ...prevState.options.grid,
-        borderColor: isDarkMode ? '#5D6974' : '#f8f8f8',
-      },
-      xaxis: {
-        ...prevState.options.xaxis,
-        categories: days,
-        labels: {
-          ...prevState.options.xaxis?.labels,
-          style: {
-            ...prevState.options.xaxis?.labels?.style,
-            fontSize: days.length > 10 ? "8px" : "10px"
+    setState(prevState => ({
+      ...prevState,
+      series: series,
+      options: {
+        ...prevState.options,
+        grid: {
+          ...prevState.options.grid,
+          borderColor: isDarkMode ? '#5D6974' : '#f8f8f8',
+        },
+        xaxis: {
+          ...prevState.options.xaxis,
+          categories: days,
+          labels: {
+            ...prevState.options.xaxis?.labels,
+            style: {
+              ...prevState.options.xaxis?.labels?.style,
+              fontSize: days.length > 10 ? "8px" : "10px"
+            }
           }
-        }
-      },
-      yaxis: {
-        ...prevState.options.yaxis,
-        min: 0,
-        max: calculatedMax,
-      },
-      legend: {
-        ...prevState.options.legend,
-        labels: {
-          colors: isDarkMode ? '#B9C2CA' : '#5D6974',
-        }
-      },
-      plotOptions: {
-        ...prevState.options.plotOptions,
-        bar: {
-          ...prevState.options.plotOptions?.bar,
-          dataLabels: {
-            ...prevState.options.plotOptions?.bar?.dataLabels,
-            total: {
-              ...prevState.options.plotOptions?.bar?.dataLabels?.total,
-              enabled: series.length === 1,
-              style: {
-                ...prevState.options.plotOptions?.bar?.dataLabels?.total?.style,
+        },
+        yaxis: {
+          ...prevState.options.yaxis,
+          min: 0,
+          max: calculatedMax,
+        },
+        legend: {
+          ...prevState.options.legend,
+          labels: {
+            colors: isDarkMode ? '#B9C2CA' : '#5D6974',
+          }
+        },
+        plotOptions: {
+          ...prevState.options.plotOptions,
+          bar: {
+            ...prevState.options.plotOptions?.bar,
+            dataLabels: {
+              ...prevState.options.plotOptions?.bar?.dataLabels,
+              total: {
+                ...prevState.options.plotOptions?.bar?.dataLabels?.total,
+                enabled: series.length === 1,
+                style: {
+                  ...prevState.options.plotOptions?.bar?.dataLabels?.total?.style,
+                }
               }
             }
           }
+        },
+        annotations: {
+          yaxis: showAverageLine ? [{
+            y: minIdealValue,
+            y2: maxIdealValue,
+            borderColor: 'rgba(34, 197, 94, 0.6)',
+            borderWidth: 1,
+            strokeDashArray: 4,
+            fillColor: 'rgba(34, 197, 94, 0.12)',
+            opacity: 1,
+          }] : []
         }
-      },
-      annotations: {
-        yaxis: showAverageLine ? [{
-          y: minIdealValue,
-          y2: maxIdealValue,
-          borderColor: 'rgba(34, 197, 94, 0.6)',
-          borderWidth: 1,
-          strokeDashArray: 4,
-          fillColor: 'rgba(34, 197, 94, 0.12)',
-          opacity: 1,
-        }] : []
       }
-    }
-  }));
-}, [series, days, isDarkMode, showAverageLine, averageValue, minIdealValue, maxIdealValue]);
+    }));
+  }, [series, days, isDarkMode, showAverageLine, averageValue, minIdealValue, maxIdealValue]);
 
 
 
@@ -373,7 +372,7 @@ useEffect(() => {
             {/* Series Legend Items */}
             {isLegend && series.map((s, index) => (
               <div key={index} className="flex items-center gap-2">
-                <span 
+                <span
                   className="w-3 h-3 rounded-sm"
                   style={{ backgroundColor: s.color || '#FFA600' }}
                 />
@@ -382,28 +381,27 @@ useEffect(() => {
                 </span>
               </div>
             ))}
-            
+
             {/* İdeal Tüketim Toggle */}
             {onToggleAverageLine && (
-              <label 
+              <label
                 className="flex items-center gap-2 cursor-pointer select-none"
                 onClick={() => onToggleAverageLine(!showAverageLine)}
               >
-                <span 
+                <span
                   className="w-6 h-3 rounded-sm"
-                  style={{ 
-                    background: showAverageLine 
+                  style={{
+                    background: showAverageLine
                       ? 'linear-gradient(180deg, rgba(34, 197, 94, 0.35) 0%, rgba(34, 197, 94, 0.15) 50%, rgba(34, 197, 94, 0.35) 100%)'
                       : 'rgba(156, 163, 175, 0.3)',
                     border: showAverageLine ? '1px dashed rgba(34, 197, 94, 0.7)' : '1px dashed #9CA3AF'
                   }}
                 />
-                <span 
-                  className={`text-xs font-semibold transition-colors ${
-                    showAverageLine 
-                      ? 'text-gray8 dark:text-gray4' 
-                      : 'text-gray-400 dark:text-gray-500'
-                  }`}
+                <span
+                  className={`text-xs font-semibold transition-colors ${showAverageLine
+                    ? 'text-gray8 dark:text-gray4'
+                    : 'text-gray-400 dark:text-gray-500'
+                    }`}
                 >
                   {t("global.idealConsumption") || "İdeal Tüketim"}
                 </span>

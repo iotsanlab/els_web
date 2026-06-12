@@ -144,6 +144,7 @@
     "online": "Online",
     "offline": "Offline",
     "platform": "Platform",
+    "ground": "Ground",
     "energyConsumptionTrend": "Energy Consumption Trend Chart",
     "currentSOC": "Current SOC (%)",
     "overallBatteryHealth": "Overall Battery Health",
@@ -299,7 +300,15 @@
     "summaryWidget": {
       "fuel": "Energy Consumption",
       "workTime": "Working Hours",
-      "days": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      "days": [
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat",
+        "Sun"
+      ],
       "time": "Weekly",
       "labels": {
         "fuel": "Fuel",
@@ -474,7 +483,11 @@
       "fax": "Fax",
       "mail": "Mail address",
       "web": "Web Site",
-      "machines": ["Telehandler", "Excavator", "Backhoeloader"]
+      "machines": [
+        "Telehandler",
+        "Excavator",
+        "Backhoeloader"
+      ]
     }
   },
   "documentPage": {
@@ -488,7 +501,6 @@
     "totalWorkingTime": "Total Working Hours",
     "workingGraph": "Working Graph",
     "fuelGraph": "Tüketilen Enerji Grafiği",
-
     "machineName": "Machine Name",
     "serialNumber": "Serial Number",
     "model": "Model",
