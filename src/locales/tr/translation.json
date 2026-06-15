@@ -85,6 +85,7 @@
     "description": "Açıklama",
     "active": "Aktif",
     "hour": "saat",
+    "empty": "Boş",
     "close": "Kapalı",
     "select": "Seçiniz",
     "months": {

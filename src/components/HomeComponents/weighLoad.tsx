@@ -30,6 +30,9 @@ const WeighLoad = ({ value, desc1, desc2, desc3 }: WeighLoadProps) => {
           offsetY: 10,
         },
       },
+      tooltip: {
+        enabled: false,
+      },
       // Yüzdeyi ortada göstermek için annotations
       annotations: {
         position: 'front',

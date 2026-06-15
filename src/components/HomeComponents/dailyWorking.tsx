@@ -70,9 +70,11 @@ const DailyWorking: React.FC<Props> = ({ data: propData }) => {
                                     borderRadius: '4px',
                                     color: isDarkMode ? '#fff' : '#000'
                                 }}
+                                formatter={(value: number) => [`${value} ${t("global.h")}`, t("batteryHealthPage.dailyWorkingHours")]}
                             />
                             <Bar
                                 dataKey="hours"
+                                name={t("batteryHealthPage.dailyWorkingHours")}
                                 fill={isDarkMode ? "#e12627" : "#e12627"}
                                 radius={[4, 4, 0, 0]}
                                 label={{ position: 'top', fill: isDarkMode ? '#fff' : '#333', fontSize: 12 }}

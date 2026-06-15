@@ -88,6 +88,7 @@ const EnergyConsumptionChart: React.FC<Props> = ({ data: propData }) => {
                         <Area
                             type="monotone"
                             dataKey="value"
+                            name={t("batteryHealthPage.energyConsumptionTrend")}
                             stroke={brandColor}
                             fill="url(#colorValue)"
                             label={{
