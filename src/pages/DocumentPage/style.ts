@@ -1,28 +1,82 @@
-import { StyleSheet } from '@react-pdf/renderer';
+import React from 'react';
 
-const styles = StyleSheet.create({
+const styles: Record<string, React.CSSProperties> = {
     viewer: {
         width: '100%',
         height: '100vh',
-        fontFamily: 'Roboto',
+        fontFamily: 'Roboto, sans-serif',
     },
     page: {
         backgroundColor: '#fff',
-        paddingVertical: 7,
-        paddingHorizontal: 10,
+        paddingTop: 7,
+        paddingBottom: 7,
+        paddingLeft: 10,
+        paddingRight: 10,
         borderRadius: 5,
-        fontFamily: 'Roboto',
+        fontFamily: 'Roboto, sans-serif',
     },
     header: {
         backgroundColor: "#005A9C",
         padding: 5,
+        marginLeft: 10,
+        marginRight: 10,
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    headerText: {
+        color: 'white',
+        fontSize: 18,
     },
     content: {
         padding: 10,
     },
+    infoCard: {
+        border: '1px solid #d6d6d6',
+        marginLeft: 10,
+        marginRight: 10,
+        padding: 10,
+        marginBottom: 10,
+        display: 'flex',
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+    },
+    infoCardRow: {
+        display: 'flex',
+        flexDirection: 'row',
+        width: '50%',
+    },
+    infoCardRowColText: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 5,
+        paddingBottom: 5,
+        borderBottom: '1px solid #d6d6d6',
+    },
+    infoCardTitle: {
+        fontSize: 12,
+        fontWeight: 700,
+        color: '#000',
+        marginBottom: 5,
+        marginRight: 10,
+    },
+    infoCardTitleCol: {
+        fontSize: 14,
+        fontWeight: 700,
+        color: '#000',
+        marginLeft: 5,
+    },
+    infoCardValue: {
+        fontSize: 14,
+        fontWeight: 400,
+        color: '#000',
+    },
     title: {
         fontSize: 12,
         fontWeight: 700,
+        color: '#000',
         marginBottom: 10,
     },
     table: {
@@ -31,16 +85,18 @@ const styles = StyleSheet.create({
         width: '100%',
         borderStyle: 'solid',
         borderWidth: 1,
-        borderColor: '#000',
+        borderColor: '#d6d6d6',
+        borderBottomWidth: 0,
         marginBottom: 10,
     },
     tableRow: {
         display: 'flex',
         flexDirection: 'row',
         borderBottomWidth: 0,
-        borderBottomColor: '#000',
+        borderBottomColor: '#d6d6d6',
         borderBottomStyle: 'solid',
-        alignItems: 'center',
+        alignItems: 'stretch',
+        minHeight: 22,
     },
     tableRowLast: {
         borderBottomWidth: 0,
@@ -50,42 +106,45 @@ const styles = StyleSheet.create({
         flexBasis: 0,
         padding: 5,
         textAlign: 'center',
-        borderBottomWidth: 1,
-        borderBottomColor: '#000',
-        borderBottomStyle: 'solid',
-        borderRightWidth: 1,
-        borderRightColor: '#000',
-        borderRightStyle: 'solid',
-        fontSize: 10,
+        borderBottom: '1px solid #d6d6d6',
+        borderRight: '1px solid #d6d6d6',
+        fontSize: 14,
+        overflow: 'hidden',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     tableNoColBorder: {
         flexGrow: 1,
         flexBasis: 0,
         padding: 5,
         textAlign: 'center',
-        borderRightWidth: 1,
-        borderRightColor: '#000',
-        borderRightStyle: 'solid',
-        fontSize: 10,
+        borderRight: '1px solid #d6d6d6',
+        fontSize: 14,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     tableHeader: {
-        backgroundColor: '#f2f2f2',
+        backgroundColor: '#eae9f2',
         fontWeight: 'bold',
     },
     tableHeaderText: {
-        fontSize: 8,
+        fontSize: 12,
         fontWeight: 'bold',
+        color: '#222',
         textAlign: 'center',
     },
     tableCell: {
-        fontSize: 9,
+        fontSize: 12,
+        color: '#222',
         textAlign: 'center',
     },
     rolanti: {
         backgroundColor: '#B9C2CA',
     },
     eco: {
-        backgroundColor: '#0A8AD8',
+        backgroundColor: '#FFD335',
     },
     power: {
         backgroundColor: '#FFA600',
@@ -94,8 +153,19 @@ const styles = StyleSheet.create({
         backgroundColor: '#E84747',
     },
     modCol: {
-        width: 120
+        width: 120,
     },
-});
+    chartPageContent: {
+        padding: 10,
+        marginTop: 8,
+        display: 'flex',
+        alignItems: 'center',
+    },
+    chartImage: {
+        width: 760,
+        maxWidth: '100%',
+        marginTop: 12,
+    },
+};
 
 export default styles;

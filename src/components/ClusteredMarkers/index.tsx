@@ -4,7 +4,7 @@ import { type Marker, MarkerClusterer, GridAlgorithm } from "@googlemaps/markerc
 import { ServiceLocation } from "../../utils/map";
 import { CustomMarker } from "../CustomMarker";
 
-export type ClusteredMarkersProps = { 
+export type ClusteredMarkersProps = {
   locations: ServiceLocation[];
   onMarkerClick: (id: number, visible?: boolean, type?: string, serviceId?: number) => void;
 };
@@ -21,17 +21,17 @@ export const ClusteredMarkers = ({
   // eslint-disable-next-line no-unused-vars
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
   const map = useMap();
-  
+
   // Create clusterer using useMemo to ensure proper reactivity
   const clusterer = useMemo(() => {
     if (!map) return null;
-    
+
     try {
       const algorithm = new GridAlgorithm({
         maxZoom: 15,
         gridSize: 30
       });
-      
+
       return new MarkerClusterer({ map, algorithm });
     } catch (error) {
       console.error("Error creating clusterer:", error);
@@ -41,22 +41,22 @@ export const ClusteredMarkers = ({
 
   // Sadece marker ekleme/silme gibi yapısal değişikliklerde marker'ları sıfırla
   // State değişikliklerinde (marker rengi vs.) sıfırlama yapma
-  const locationIds = useMemo(() => 
-    locations.map(loc => loc.id).sort().join(','), 
+  const locationIds = useMemo(() =>
+    locations.map(loc => loc.id).sort().join(','),
     [locations]
   );
 
   // Reset markers when location structure changes (add/remove)
   useEffect(() => {
     if (!clusterer) return;
-    
+
     // Clear all existing markers when locations structure change
     try {
       clusterer.clearMarkers();
     } catch (error) {
       console.error("Error clearing markers:", error);
     }
-    
+
     // Reset markers state if locations is empty
     if (locations.length === 0) {
       setMarkers({});
@@ -66,40 +66,33 @@ export const ClusteredMarkers = ({
   // Add markers to clusterer when they change
   useEffect(() => {
     if (!clusterer || !map) return;
-    
     const markerArray = Object.values(markers);
     if (markerArray.length === 0) return;
-    
-    // Check if map is loaded enough to add markers
-    const tryAddMarkers = () => {
+
+    let done = false;
+    const addOnce = () => {
+      if (done) return true;
       try {
         clusterer.clearMarkers();
         clusterer.addMarkers(markerArray);
+        done = true;
         return true;
       } catch (error) {
         console.error("Error adding markers, will retry:", error);
         return false;
       }
     };
-    
-    // Try immediately if projection exists
-    if (map.getProjection() && tryAddMarkers()) {
-      return;
-    }
-    
-    // Otherwise wait for idle event
+
+    if (map.getProjection() && addOnce()) return;
+
     const idleListener = map.addListener('idle', () => {
-      if (tryAddMarkers()) {
-        google.maps.event.removeListener(idleListener);
-      }
+      if (addOnce()) google.maps.event.removeListener(idleListener);
     });
-    
-    // Also try after a timeout as last resort
     const timeoutId = setTimeout(() => {
-      tryAddMarkers();
+      addOnce();
       google.maps.event.removeListener(idleListener);
     }, 1000);
-    
+
     return () => {
       google.maps.event.removeListener(idleListener);
       clearTimeout(timeoutId);
@@ -125,7 +118,7 @@ export const ClusteredMarkers = ({
     });
   }, []);
 
-  
+
 
   return (
     <>

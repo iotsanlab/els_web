@@ -1,24 +1,31 @@
-import { View, Text } from "@react-pdf/renderer";
+import React from "react";
 import styles from "./style";
 
 interface Column {
   key: string;
   header: string;
-  style?: any;
+  style?: React.CSSProperties;
 }
 
 interface Row {
   [key: string]: string | number;
 }
 
+interface FooterCell {
+  value: string;
+  colspan?: number;
+  style?: React.CSSProperties;
+}
+
 interface PDFTableProps {
   columns: Column[];
   rows: Row[];
-  headerStyle?: any;
-  cellStyle?: any;
+  headerStyle?: React.CSSProperties;
+  cellStyle?: React.CSSProperties;
   colorScheme?: {
-    [key: string]: any;
+    [key: string]: React.CSSProperties;
   };
+  footer?: FooterCell[][];
 }
 
 const PDFTableFuel = ({
@@ -27,8 +34,8 @@ const PDFTableFuel = ({
     { key: "serialNumber", header: "Seri No" },
     { key: "class", header: "Sınıf" },
     { key: "model", header: "Model" },
-    { key: "totalFuel", header: "Toplam Yakıt (L)", style: styles.fuelTotal },
-    { key: "avgFuel", header: "Ortalama (L/sa)", style: styles.fuelAvg },
+    { key: "totalFuel", header: "Toplam Enerji (kWh)" },
+    { key: "avgFuel", header: "Ortalama (kWh/sa.)" },
   ],
   rows = [
     {
@@ -43,47 +50,105 @@ const PDFTableFuel = ({
   headerStyle = styles.tableHeader,
   cellStyle = styles.tableCell,
   colorScheme = {},
+  footer = [],
 }: PDFTableProps) => {
+  // Footer hücresi için colspan'e göre stil hesapla
+  const getColspanStyle = (startColIndex: number, colspan: number): React.CSSProperties => {
+    const spannedColumns = columns.slice(startColIndex, startColIndex + colspan);
+
+    let totalFixedWidth = 0;
+    let flexCount = 0;
+
+    spannedColumns.forEach((col) => {
+      if (col.style?.width) {
+        totalFixedWidth += (col.style.width as number) + 45;
+      } else {
+        flexCount++;
+      }
+    });
+
+    if (flexCount === 0) {
+      return { width: totalFixedWidth, flexGrow: 0, flexBasis: totalFixedWidth };
+    }
+
+    if (totalFixedWidth === 0) {
+      return { flexGrow: colspan, flexBasis: 0 };
+    }
+
+    return { flexGrow: flexCount, flexBasis: totalFixedWidth };
+  };
+
   return (
-    <View style={styles.table}>
+    <div style={styles.table}>
       {/* Tablo Başlık */}
-      <View style={[styles.tableRow, styles.tableHeaderRow]}>
+      <div style={{ ...styles.tableRow }}>
         {columns.map((column, index) => (
-          <View
+          <div
             key={index}
-            style={[
-              styles.tableCol,
-              headerStyle,
-              column.style,
-              colorScheme[column.key],
-            ]}
+            style={{
+              ...styles.tableCol,
+              ...headerStyle,
+              ...column.style,
+              ...(colorScheme[column.key] || {}),
+            }}
           >
-            <Text style={styles.tableHeaderText}>{column.header}</Text>
-          </View>
+            <span style={styles.tableHeaderText}>{column.header}</span>
+          </div>
         ))}
-      </View>
+      </div>
 
       {/* Tablo Satırları */}
       {rows.map((row, rowIndex) => (
-        <View key={rowIndex} style={styles.tableRow}>
+        <div key={rowIndex} style={styles.tableRow}>
           {columns.map((column, colIndex) => (
-            <View
+            <div
               key={`${rowIndex}-${colIndex}`}
-              style={[
-                styles.tableCol,
-                cellStyle,
-                column.style,
-                colorScheme[column.key],
-              ]}
+              style={{
+                ...styles.tableCol,
+                ...cellStyle,
+                ...column.style,
+                ...(colorScheme[column.key] || {}),
+              }}
             >
-              <Text style={styles.tableCell}>
+              <span style={styles.tableCell}>
                 {row[column.key] !== undefined ? row[column.key] : "-"}
-              </Text>
-            </View>
+              </span>
+            </div>
           ))}
-        </View>
+        </div>
       ))}
-    </View>
+
+      {/* Tablo Footer Satırları (tfoot) */}
+      {footer.length > 0 &&
+        footer.map((footerRow, footerRowIndex) => {
+          let colIndex = 0;
+          return (
+            <div
+              key={`footer-${footerRowIndex}`}
+              style={{
+                ...styles.tableRow,
+                backgroundColor: "#eae9f2",
+              }}
+            >
+              {footerRow.map((cell, cellIndex) => {
+                const colspan = cell.colspan || 1;
+                const colspanStyle = getColspanStyle(colIndex, colspan);
+                colIndex += colspan;
+                return (
+                  <div
+                    key={`footer-${footerRowIndex}-${cellIndex}`}
+                    style={{ ...styles.tableCol, ...colspanStyle, ...cell.style }}
+                  >
+                    <span style={{ ...styles.tableCell, fontWeight: "bold" }}>
+                      {cell.value}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+    </div>
   );
 };
 

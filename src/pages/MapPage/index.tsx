@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback, useTransition } from "react";
 import { APIProvider, ControlPosition, Map } from "@vis.gl/react-google-maps";
 import { useDarkMode } from "../../context/DarkModeContext";
 import { CustomZoomControl } from "../../components/MapControl";
@@ -23,7 +23,7 @@ import SpacesWithDevices from "../../components/WorkSpaceWithShapes/spacesWithDe
 import { useNotification } from "../../hooks/useNotification";
 
 import { alarm } from "../../services/endpoints";
-import { refreshAllTelemetry } from "../../hooks/useDeviceInitialization";
+import { refreshMapTelemetry } from "../../hooks/useDeviceInitialization";
 
 interface NearestServiceType {
   id: number;
@@ -90,6 +90,7 @@ const MapPage = () => {
   const { t } = useTranslation();
   const navigation = useNavigate();
   const { isDarkMode } = useDarkMode();
+  const [, startTransition] = useTransition();
   const [userID, setUserID] = useState<string>("");
   const [isEditMode, setIsEditMode] = useState(false);
   const [shapeInfos, setShapeInfos] = useState<ShapeInfo[]>([]);
@@ -123,7 +124,7 @@ const MapPage = () => {
     enabled: !!infoMenu?.id
   });
 
-  const startPolygonDrawing = () => {
+  const startPolygonDrawing = useCallback(() => {
     if (!isEditMode) {
       setIsEditMode(true);
     }
@@ -164,7 +165,7 @@ const MapPage = () => {
     };
 
     setTimeout(checkDrawingManager, isEditMode ? 100 : 300);
-  };
+  }, [isEditMode]);
 
   const [machineAssignments, setMachineAssignments] = useState<
     Record<string, string[]>
@@ -187,9 +188,6 @@ const MapPage = () => {
 
   const [vehicles, setVehicles] = useState<ServiceLocation[]>([]);
   const [services, setServices] = useState<ServiceLocation[]>([]);
-  const [displayedLocations, setDisplayedLocations] = useState<
-    ServiceLocation[]
-  >([]);
   const [showServices, setShowServices] = useState<boolean>(!!machineSerialNo || fromWarning);
   const [vehicleFilterConfig, setVehicleFilterConfig] = useState<any>(null);
 
@@ -215,7 +213,7 @@ const MapPage = () => {
     fetchData();
   }, []);
 
-  const syncShapesToAPI = async (shapes: ShapeInfo[]) => {
+  const syncShapesToAPI = useCallback(async (shapes: ShapeInfo[]) => {
     const formattedShapes = shapes.map((shape) => {
       const path = (shape.shape as google.maps.Polygon)
         .getPath()
@@ -239,7 +237,7 @@ const MapPage = () => {
     } catch (error) {
       console.error("Çalışma alanları güncellenemedi:", error);
     }
-  };
+  }, []);
 
   const initialNearestService = useMemo(() => {
     if ((fromWarning || machineSerialNo) && lat && long) {
@@ -260,50 +258,13 @@ const MapPage = () => {
     return null;
   }, [fromWarning, lat, long, machineSerialNo]);
 
-  const center = useMemo(() => {
-    if (initialNearestService && fromWarning) {
-      return {
-        lat: parseFloat(String(initialNearestService.lat)),
-        lng: parseFloat(String(initialNearestService.long)),
-      };
-    }
-
-    if (machineSerialNo && !fromWarning) {
-      const machine = machineStore.getAllMachines().find((m) => m.serialNo === machineSerialNo);
-      if (machine && machine.lat && machine.long) {
-        return {
-          lat: machine.lat,
-          lng: machine.long,
-        };
-      }
-    }
-
-    if (displayedLocations.length === 0) {
-      return { lat: 39.0, lng: 35.0 };
-    }
-
-    const lats = displayedLocations
-      .map((m) => m.latitude)
-      .filter((lat) => lat !== 0);
-    const lngs = displayedLocations
-      .map((m) => m.longitude)
-      .filter((lng) => lng !== 0);
-
-    if (lats.length === 0 || lngs.length === 0) {
-      return { lat: 39.0, lng: 35.0 };
-    }
-
-    return {
-      lat: 39.0,
-      lng: 35.0,
-    };
-  }, [displayedLocations, fromWarning, initialNearestService, machineSerialNo]);
-
   // Servis noktalarını yükle (statik veri, sadece bir kez)
   useEffect(() => {
+    // getAllMachines() döngü dışında bir kez okunuyor (her servis için tekrar çağrılmıyor)
+    const machineCount = machineStore.getAllMachines().length;
     const serviceLocations = service_locations[0].localServices.map(
       (service) => ({
-        id: machineStore.getAllMachines().length + service.id || 0,
+        id: machineCount + (service.id || 0),
         serviceId: service.id || 0,
         name: service.name || "",
         type: "service",
@@ -327,7 +288,6 @@ const MapPage = () => {
         const timerValue = await getTimerSetting(userID);
         if (timerValue !== null) {
           setTimerInterval(timerValue);
-
         }
         setIsTimerLoaded(true);
       } catch (error) {
@@ -372,8 +332,12 @@ const MapPage = () => {
           : machine.user_fullname || "",
       };
     });
-    setVehicles(vehicleLocations as ServiceLocation[]);
-  }, [machineSerialNo, lat, long]);
+    // startTransition: marker güncelleme re-render'ını düşük öncelikli yap
+    // böylece harita panning/zoom'u bloklanmaz
+    startTransition(() => {
+      setVehicles(vehicleLocations as ServiceLocation[]);
+    });
+  }, [machineSerialNo, lat, long, startTransition]);
 
   useEffect(() => {
     // Timer ayarı yüklenene kadar başlatma
@@ -385,8 +349,8 @@ const MapPage = () => {
 
       isMapRefreshing.current = true;
       try {
-        // Tüm cihazların telemetri verilerini toplu olarak güncelle (lat/long/RPM/stat vs.)
-        await refreshAllTelemetry();
+        // Sadece konum ve durum bilgisini güncelle (60 günlük daily veri çekilmez)
+        await refreshMapTelemetry();
         // Güncellenmiş store'dan vehicle locations'ı yeniden oluştur
         rebuildVehicleLocations();
       } catch (error) {
@@ -404,89 +368,71 @@ const MapPage = () => {
     return () => clearInterval(reload);
   }, [isTimerLoaded, timerInterval, rebuildVehicleLocations]);
 
-  const updateDisplayedLocations = useCallback(() => {
-    let filteredVehicles = [...vehicles];
-    if (machineSerialNo) {
-      filteredVehicles = filteredVehicles.filter(v => v.maintenance === machineSerialNo);
-    } else if (vehicleFilterConfig) {
-      filteredVehicles = vehicles
-        .map((vehicle) => ({
-          ...vehicle,
-          visible: isVehicleVisible(vehicle.id, vehicleFilterConfig),
-        }))
-        .filter((vehicle) => vehicle.visible);
-    }
-    const newLocations = showServices
-      ? [...filteredVehicles, ...services]
-      : [...filteredVehicles];
-    setDisplayedLocations(newLocations as ServiceLocation[]);
-  }, [vehicles, services, vehicleFilterConfig, showServices, machineSerialNo]);
-
-  useEffect(() => {
-    if (vehicles.length > 0 || services.length > 0) {
-      updateDisplayedLocations();
-    }
-  }, [
-    showServices,
-    vehicleFilterConfig,
-    vehicles,
-    services,
-    updateDisplayedLocations,
-  ]);
-
-
-
-  useEffect(() => {
-    if (googleMap) {
-      try {
-        (googleMap as any).setMapId(isDarkMode ? MAP_IDS[3] : MAP_IDS[0]);
-
-        const projectionTimeout = setTimeout(() => {
-          const idleListener = googleMap.addListener("idle", () => {
-            if (googleMap.getProjection()) {
-              updateDisplayedLocations();
-              google.maps.event.removeListener(idleListener);
-            }
-          });
-
-          setTimeout(() => {
-            google.maps.event.removeListener(idleListener);
-          }, 5000);
-        }, 300);
-
-        return () => {
-          clearTimeout(projectionTimeout);
-        };
-      } catch (error) {
-        console.error(
-          "Dark mode değişiminde harita güncellenirken hata:",
-          error
-        );
-      }
-    }
-  }, [isDarkMode, googleMap, updateDisplayedLocations]);
-
-  const isVehicleVisible = (vehicleId: number, filterConfig: any) => {
-    const controlData: any[] = [];
-
-    const selectedVehicleIds = filterConfig.map((vehicle: any) =>
-      vehicle.children.find(
-        (child: any) => child.id == vehicleId && child.checked == true
-      )
-    );
-    selectedVehicleIds.forEach((id: any) => {
-      if (id) {
-        controlData.push(id);
-      }
+  // Filtre konfigürasyonundan görünür araç ID'lerini bir kez Set olarak çıkar (O(n*m) -> O(n))
+  const visibleVehicleIds = useMemo<Set<string> | null>(() => {
+    if (!vehicleFilterConfig) return null;
+    const ids = new Set<string>();
+    vehicleFilterConfig.forEach((group: any) => {
+      group.children?.forEach((child: any) => {
+        if (child?.checked) ids.add(String(child.id));
+      });
     });
-    return controlData.length > 0;
-  };
+    return ids;
+  }, [vehicleFilterConfig]);
 
-  const handleFilterChange = (selectedVehicles: any) => {
+  // displayedLocations artık türetilmiş değer (useMemo) -> ekstra render + ikinci clustering yok
+  const displayedLocations = useMemo<ServiceLocation[]>(() => {
+    let filteredVehicles: ServiceLocation[];
+
+    if (machineSerialNo) {
+      filteredVehicles = vehicles.filter((v) => v.maintenance === machineSerialNo);
+    } else if (visibleVehicleIds) {
+      filteredVehicles = vehicles.filter((v) => visibleVehicleIds.has(String(v.id)));
+    } else {
+      filteredVehicles = vehicles;
+    }
+
+    return showServices ? [...filteredVehicles, ...services] : filteredVehicles;
+  }, [vehicles, services, visibleVehicleIds, showServices, machineSerialNo]);
+
+  const center = useMemo(() => {
+    if (initialNearestService && fromWarning) {
+      return {
+        lat: parseFloat(String(initialNearestService.lat)),
+        lng: parseFloat(String(initialNearestService.long)),
+      };
+    }
+
+    if (machineSerialNo && !fromWarning) {
+      const machine = machineStore.getAllMachines().find((m) => m.serialNo === machineSerialNo);
+      if (machine && machine.lat && machine.long) {
+        return {
+          lat: machine.lat,
+          lng: machine.long,
+        };
+      }
+    }
+
+    return { lat: 39.0, lng: 35.0 };
+  }, [fromWarning, initialNearestService, machineSerialNo]);
+
+  // Dark mode değişiminde sadece map id'yi güncelle.
+  // (Eski versiyon updateDisplayedLocations'a bağlıydı, bu yüzden her telemetri
+  //  tikinde tekrar çalışıp idle listener biriktiriyordu.)
+  useEffect(() => {
+    if (!googleMap) return;
+    try {
+      (googleMap as any).setMapId(isDarkMode ? MAP_IDS[3] : MAP_IDS[0]);
+    } catch (error) {
+      console.error("Dark mode değişiminde harita güncellenirken hata:", error);
+    }
+  }, [isDarkMode, googleMap]);
+
+  const handleFilterChange = useCallback((selectedVehicles: any) => {
     setVehicleFilterConfig(selectedVehicles);
-  };
+  }, []);
 
-  const handleAssignmentChange = async (assignments: Record<string, string[]>) => {
+  const handleAssignmentChange = useCallback(async (assignments: Record<string, string[]>) => {
     const entityType = userStore.entityType || "DEVICE";
 
     // Önceki tüm atanmış makine ID'lerini topla
@@ -542,11 +488,11 @@ const MapPage = () => {
     for (const machineId of removedMachineIds) {
       await saveWorkingAreasToDevice(machineId, JSON.stringify([]), entityType);
     }
-  };
+  }, [machineAssignments, syncShapesToAPI]);
 
-  const handleServiceClick = (showServicesFlag: boolean) => {
+  const handleServiceClick = useCallback((showServicesFlag: boolean) => {
     setShowServices(showServicesFlag);
-  };
+  }, []);
 
   useEffect(() => {
     setRenderMap(true);
@@ -560,9 +506,6 @@ const MapPage = () => {
 
       if (machine) {
         setSelectedMachineId(machine.id);
-
-        // Servis noktalarını silme - hem filo hem uyarı ekranından gelince servisler görünür olmalı
-        // setServices([]) kaldırıldı
 
         setInfoMenu({
           serialNo: machine.serialNo,
@@ -711,19 +654,15 @@ const MapPage = () => {
     }
   }, [googleMap, nearestService, machineSerialNo, fromWarning]);
 
-  if (!renderMap) {
-    return <div className="relative w-full h-screen">Loading map...</div>;
-  }
-
-  const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-
-  const handleOnLoad = (event: any) => {
-    if (event.detail && event.detail.map) {
-      setGoogleMap(event.detail.map);
+  // Sadece ilk haritayı set et; onIdle/onTilesLoaded her tetiklendiğinde
+  // tekrar setGoogleMap çağırıp gereksiz render yaratmasın.
+  const handleOnLoad = useCallback((event: any) => {
+    if (event.detail?.map) {
+      setGoogleMap((prev) => prev ?? event.detail.map);
     }
-  };
+  }, []);
 
-  const toggleShapeVisibility = (id: string) => {
+  const toggleShapeVisibility = useCallback((id: string) => {
     setShapeInfos((prevShapes) =>
       prevShapes.map((shapeInfo) => {
         if (shapeInfo.id === id) {
@@ -746,21 +685,21 @@ const MapPage = () => {
         return shapeInfo;
       })
     );
-  };
+  }, []);
 
-  const deleteShape = (id: string) => {
-    const shapeToDelete = shapeInfos.find((s) => s.id === id);
-    if (shapeToDelete) {
-      shapeToDelete.shape.setMap(null);
-      setShapeInfos((prevShapes) => {
-        const updated = prevShapes.filter((s) => s.id !== id);
-        syncShapesToAPI(updated);
-        return updated;
-      });
-    }
-  };
+  const deleteShape = useCallback((id: string) => {
+    setShapeInfos((prevShapes) => {
+      const shapeToDelete = prevShapes.find((s) => s.id === id);
+      if (shapeToDelete) {
+        shapeToDelete.shape.setMap(null);
+      }
+      const updated = prevShapes.filter((s) => s.id !== id);
+      syncShapesToAPI(updated);
+      return updated;
+    });
+  }, [syncShapesToAPI]);
 
-  const renameShape = async (id: string, newName: string) => {
+  const renameShape = useCallback(async (id: string, newName: string) => {
     setShapeInfos((prev) => {
       const updated = prev.map((shape) =>
         shape.id === id ? { ...shape, name: newName } : shape
@@ -768,9 +707,9 @@ const MapPage = () => {
       syncShapesToAPI(updated);
       return updated;
     });
-  };
+  }, [syncShapesToAPI]);
 
-  const colorChangeShape = (id: string, newColor: string) => {
+  const colorChangeShape = useCallback((id: string, newColor: string) => {
     setShapeInfos((prev) => {
       const updated = prev.map((shape) => {
         if (shape.id === id) {
@@ -790,60 +729,77 @@ const MapPage = () => {
 
       return updated;
     });
-  };
+  }, [syncShapesToAPI]);
 
-  const getRandomColor = () => {
+  const getRandomColor = useCallback(() => {
     const hue = Math.floor(Math.random() * 360);
     return `hsl(${hue}, 70%, 50%)`;
-  };
+  }, []);
 
-  const markerClick = (
+  const markerClick = useCallback((
     id: string,
     visible: boolean,
     type?: string,
     serviceId?: number
   ) => {
-    if (visible) {
-      setInfoMenu(null);
-      setServiceInfoMenu(null);
-      const machine = machineStore.getAllMachines().find((m) => m.id === id);
-      setSelectedMachineId(id);
-      if (machine) {
-        setInfoMenu({
-          serialNo: machine.serialNo,
-          deviceName: machine.deviceName,
-          totalHours: machine.totalWorkingHours,
-          operator: machine.user_fullname,
-          lock: true,
-          type: machine.type,
-          saseNo: machine.serialNo,
-          id: machine.id,
-          instantFuel: machine.instantFuel,
-          totalUsedFuel: machine.totalUsedFuel,
-          title: `- ${machine.model}`,
-        });
-      }
+    if (!visible) return;
 
-      if (type === "service") {
-        const service = service_locations[0].allServices.find(
-          (s) => s.id === serviceId
-        );
-        setServiceInfoMenu({
-          title: service?.name || "",
-          operatorName: service?.authorizedPerson || "",
-          address: service?.address || "",
-          phoneNumber: service?.phone.shift() || "",
-          email: service?.email || "",
-        });
-      }
+    setInfoMenu(null);
+    setServiceInfoMenu(null);
+
+    const machine = machineStore.getAllMachines().find((m) => m.id === id);
+    setSelectedMachineId(id);
+    if (machine) {
+      setInfoMenu({
+        serialNo: machine.serialNo,
+        deviceName: machine.deviceName,
+        totalHours: machine.totalWorkingHours,
+        operator: machine.user_fullname,
+        lock: true,
+        type: machine.type,
+        saseNo: machine.serialNo,
+        id: machine.id,
+        instantFuel: machine.instantFuel,
+        totalUsedFuel: machine.totalUsedFuel,
+        title: `- ${machine.model}`,
+      });
     }
-  };
+
+    if (type === "service") {
+      const service = service_locations[0].allServices.find(
+        (s) => s.id === serviceId
+      );
+      setServiceInfoMenu({
+        title: service?.name || "",
+        operatorName: service?.authorizedPerson || "",
+        address: service?.address || "",
+        // .shift() yerine [0]: paylaşılan veriyi mutate etmiyoruz
+        phoneNumber: Array.isArray(service?.phone) ? service?.phone[0] || "" : service?.phone || "",
+        email: service?.email || "",
+      });
+    }
+  }, []);
+
+  // ClusteredMarkers'a sabit referanslı handler geçilir (memoizasyonu bozmaz)
+  const handleMarkerClick = useCallback((
+    id: number,
+    visible: boolean | undefined,
+    type?: string,
+    serviceId?: number
+  ) => {
+    markerClick(
+      id as unknown as string,
+      visible || false,
+      type || undefined,
+      serviceId || undefined
+    );
+  }, [markerClick]);
 
   const engFuelUsed = deviceWorkStore
     .getTelemetry(selectedMachineId, "EngTotalFuelUsed")
     .at(-1)?.value;
   const engHours = deviceWorkStore
-    .getTelemetry(selectedMachineId, "EngineTotalHours")
+    .getTelemetry(selectedMachineId, "WorkingHours")
     .at(-1)?.value;
 
   const avgFuel =
@@ -863,6 +819,12 @@ const MapPage = () => {
     typeof engHours === "number" && !isNaN(engHours)
       ? `${engHours.toFixed(2)} ${t("global.h")}`
       : "-";
+
+  if (!renderMap) {
+    return <div className="relative w-full h-screen">Loading map...</div>;
+  }
+
+  const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
   return (
     <div className="flex flex-col w-full h-full">
@@ -902,19 +864,7 @@ const MapPage = () => {
               <SetupMapControls></SetupMapControls>
               <ClusteredMarkers
                 locations={displayedLocations}
-                onMarkerClick={(
-                  id: number,
-                  visible: boolean | undefined,
-                  type?: string,
-                  serviceId?: number
-                ) =>
-                  markerClick(
-                    id,
-                    visible || false,
-                    type || undefined,
-                    serviceId || undefined
-                  )
-                }
+                onMarkerClick={handleMarkerClick}
               />
 
               <CustomZoomControl

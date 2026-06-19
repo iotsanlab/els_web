@@ -64,13 +64,23 @@ const DailyWorking: React.FC<Props> = ({ data: propData }) => {
                                 axisLine={{ stroke: isDarkMode ? '#424D57' : '#E5E8EB' }}
                             />
                             <Tooltip
-                                contentStyle={{
-                                    backgroundColor: isDarkMode ? '#28333E' : '#fff',
-                                    border: `1px solid ${isDarkMode ? '#424D57' : '#E5E8EB'}`,
-                                    borderRadius: '4px',
-                                    color: isDarkMode ? '#fff' : '#000'
+                                content={({ active, payload, label }) => {
+                                    if (active && payload && payload.length) {
+                                        return (
+                                            <div 
+                                                className="p-2 bg-white dark:bg-gray10 rounded shadow text-xs font-inter font-medium"
+                                                style={{
+                                                    border: `1px solid ${isDarkMode ? '#424D57' : '#E5E8EB'}`,
+                                                    color: isDarkMode ? '#fff' : '#000'
+                                                }}
+                                            >
+                                                <p className="font-bold mb-1">{label}</p>
+                                                <p>{payload[0].value} {t("global.h")}</p>
+                                            </div>
+                                        );
+                                    }
+                                    return null;
                                 }}
-                                formatter={(value: number) => [`${value} ${t("global.h")}`, t("batteryHealthPage.dailyWorkingHours")]}
                             />
                             <Bar
                                 dataKey="hours"

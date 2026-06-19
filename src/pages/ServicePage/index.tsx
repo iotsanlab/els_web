@@ -46,13 +46,15 @@ const ServicePage = () => {
 
   const serviceData = ServiceData[0];
 
+  const isAllSelected = (val: string) => !val || val === "Hepsi";
+
   const filteredServices = selectedType === "type1"
     ? serviceData.localServices.filter(service =>
-      (selectedRegion ? service.region === selectedRegion : true) &&
-      (selectedCity ? service.city === selectedCity : true)
+      (isAllSelected(selectedRegion) || service.region === selectedRegion) &&
+      (isAllSelected(selectedCity) || service.city === selectedCity)
     )
     : serviceData.abroadServices.filter(service =>
-      selectedRegion ? service.region === selectedRegion : true
+      isAllSelected(selectedRegion) || service.region === selectedRegion
     );
 
   useEffect(() => {
@@ -89,29 +91,46 @@ const ServicePage = () => {
     if (selectedType == "type2") {
       // Çeviriden bağımsız olarak doğrudan region değerlerini kullanarak filtreleme
       const regionMapping: Record<string, string> = {
-        [t("global.region.africa")]: "Afrika",
-        [t("global.region.southAmerica")]: "Güney Amerika",
-        [t("global.region.cis")]: "CIS",
-        [t("global.region.asia")]: "Asya",
-        [t("global.region.middleEast")]: "Orta Doğu",
-        [t("global.region.europe")]: "Avrupa"
+        [t("global.region.africa")]: "Fransa",
+        [t("global.region.southAmerica")]: "Polanya",
+        [t("global.region.cis")]: "Çek Cumhuriyeti",
+        [t("global.region.asia")]: "Almanya",
+        [t("global.region.middleEast")]: "İsviçre",
+        [t("global.region.europe")]: "İspanya",
+        [t("global.region.europe")]: "İngiltere",
       };
 
-      const actualRegion = regionMapping[selectedRegion] || selectedRegion;
-      setFilteredServiceLocations(selectedCountry.filter((service) => service.region === actualRegion));
+      if (isAllSelected(selectedRegion)) {
+        setFilteredServiceLocations(selectedCountry);
+      } else {
+        const actualRegion = regionMapping[selectedRegion] || selectedRegion;
+        setFilteredServiceLocations(selectedCountry.filter((service) => service.region === actualRegion));
+      }
     }
   }, [selectedRegion, t]);
 
   const getRegionOptions = () => {
     if (selectedType === "type1") {
-      return ["Adana", "İstanbul", "Gaziantep", "Ankara", "İzmir", "Trabzon", "Samsun", "Kayseri"];
+      return [
+        "Hepsi",
+        "Ankara",
+        "Antalya",
+        "Bursa",
+        "İstanbul",
+        "Gaziantep",
+        "İzmir",
+        "Muğla",
+      ];
     } else {
       return [
-        t("global.region.africa"),
-        t("global.region.southAmerica"),
-        t("global.region.cis"),
-        t("global.region.asia"),
-        t("global.region.europe")
+        "Hepsi",
+        "Fransa",
+        "Polonya",
+        "Çek Cumhuriyeti",
+        "Almanya",
+        "İsviçre",
+        "İspanya",
+        "İngiltere"
       ];
     }
   };
@@ -179,11 +198,13 @@ const ServicePage = () => {
             onSelect={() => setSelectedType("type2")}
           />
         </div>
-        <p className="text-gray1 dark:text-white">{selectedRegion}</p>
+
 
         <div className="flex w-full items-center justify-start mb-[15px]">
           <div className="w-[500px]">
-            <GeneralTitle title={t("servicePage.areaFilter")} />
+            <GeneralTitle title={
+              selectedType == "type1" ? t("servicePage.cityFilter") : t("servicePage.regionFilter")
+            } />
             <Select
               options={getRegionOptions()}
               value={selectedRegion}
@@ -192,15 +213,7 @@ const ServicePage = () => {
           </div>
           <div className="w-[20px]"></div>
 
-          {selectedType == "type1" &&
-            <div className="w-[500px]">
-              <GeneralTitle title={t("servicePage.cityFilter")} />
-              <Select
-                options={getCities(selectedRegion)}
-                value={selectedCity}
-                onChange={setSelectedCity}
-              />
-            </div>}
+
         </div>
 
         <div className="w-[1020px]">

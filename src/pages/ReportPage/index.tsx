@@ -36,10 +36,10 @@ const ReportPage = observer(() => {
       },
       selectedMachines: formData.selectedMachines
     };
-    
+
     // Raporu ReportStore'a ekle
     reportStore.addReport(report);
-    
+
     // UI'ı güncelle
     refreshReportList();
   };
@@ -49,10 +49,10 @@ const ReportPage = observer(() => {
     selectedReports.forEach(id => {
       reportStore.removeReport(id);
     });
-    
+
     // UI'ı güncelle
     refreshReportList();
-    
+
     // Seçimi temizle
     setSelectedReports([]);
   };
@@ -60,19 +60,23 @@ const ReportPage = observer(() => {
   // Store'dan en son raporları al ve UI'ı güncelle
   const refreshReportList = () => {
     const reportsFromStore = reportStore.getAllReports();
-    
+
     const mappedReports = reportsFromStore.map((report) => ({
       id: parseInt(report.id, 10),
       name: report.reportName,
       type: report.reportType,
       timePeriod: `${report.timeRange.startDate} - ${report.timeRange.endDate}`,
-      createdTime: new Date().toLocaleDateString(),
+      createdTime: new Date(parseInt(report.id, 10)).toLocaleDateString("tr-TR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      }),
       source: report.selectedMachines.map((machine) => machine.label),
       formData: report.selectedMachines,
     }));
-    
+
     setAllReports(mappedReports);
-    
+
     // Aktif filtreler varsa uygula
     if (activeFilters.options.length > 0 || activeFilters.searchValue) {
       applyFilters(mappedReports, activeFilters.options, activeFilters.searchValue);
@@ -83,19 +87,19 @@ const ReportPage = observer(() => {
 
   const applyFilters = (data: ReportData[], options: string[], searchValue: string) => {
     let filteredData = [...data];
-  
+    const useModel = ["AE15", "EL12", "VM6"];
     if (searchValue && searchValue.trim() !== "") {
       const searchLower = searchValue.toLowerCase();
-  
+
       filteredData = filteredData.filter((report) => {
         if (report.name.toLowerCase().includes(searchLower)) {
           return true;
         }
-  
-        if (report.type.toLowerCase().includes(searchLower)) {
+
+        if (useModel ? report.formData?.some((machine) => machine.model && machine.model.toLowerCase().includes(searchLower)) : report.type.toLowerCase().includes(searchLower)) {
           return true;
         }
-  
+
         if (report.formData && report.formData.length > 0) {
           return report.formData.some((machine) => {
             return (
@@ -106,29 +110,29 @@ const ReportPage = observer(() => {
             );
           });
         }
-  
+
         return false;
       });
     }
-  
+
     if (options && options.length > 0) {
       filteredData = filteredData.filter((report) => {
         if (!report.formData || report.formData.length === 0) {
           return false;
         }
-  
+
         return report.formData.some((machine) => {
           return machine.type && options.includes(machine.type);
         });
       });
     }
-  
+
     setReports(filteredData);
   };
-  
+
   const handleSearch = (selectedOptions: string[], searchValue: string) => {
     setActiveFilters({ options: selectedOptions, searchValue });
-    
+
     if ((selectedOptions.length === 0 || !selectedOptions) && (!searchValue || searchValue.trim() === "")) {
       setReports(allReports);
     } else {
@@ -142,7 +146,7 @@ const ReportPage = observer(() => {
       refreshReportList();
     }
   }, [reportStore.isLoaded, reportStore.reports.length]);
-  
+
   return (
     <div className="flex flex-col overflow-x-auto min-w-[1340px] pr-4 w-full h-full">
       <GeneralTitle title={t("reportsPage.reportTitle")} />

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { observer } from "mobx-react";
 import { useTranslation } from "react-i18next";
 import QuickTrans from "../../components/Home/QuickTrans";
@@ -19,6 +19,19 @@ import { refreshStatusOnly } from "../../hooks/useDeviceInitialization";
 
 const allCheckedOptions = ["AE15", "EL12", "VM6"];
 
+// subtype bazlı statik idle değerleri (render başına yeniden oluşmasın diye modül seviyesinde)
+const weeklyIdleValues: Record<string, number> = {
+  AE15: 4.5,
+  EL12: 3.2,
+  VM6: 1.7,
+};
+
+const monthlyIdleValues: Record<string, number> = {
+  AE15: 23.9,
+  EL12: 16.4,
+  VM6: 8.9,
+};
+
 interface FormattedData {
   value: number;
   dayName: string;
@@ -29,9 +42,33 @@ interface FormattedData {
 interface DonutData {
   activeWorking: number;  // saat cinsinden
   idle: number;           // saat cinsinden
-  workingTime: number;    // yüzde cinsinden 
+  workingTime: number;    // yüzde cinsinden
 }
 
+function generateDummyChartData(count: number): FormattedData[] {
+  const weekdays = ["pzt", "sal", "çar", "per", "cum", "cmt", "paz"];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // zamanı sıfırla
+
+  return Array.from({ length: count }).map((_, index) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() - (count - index - 1)); // <-- bugün dahil
+
+    return {
+      value: 0,
+      dayName: weekdays[date.getDay() === 0 ? 6 : date.getDay() - 1],
+      dayNum: date.getDate(),
+      date: date.toISOString().split("T")[0],
+    };
+  });
+}
+
+// donut için yüzdelik hesaplama
+function calculateWorkingPercentage(workingHour: number, idleHour: number): number {
+  const total = workingHour + idleHour;
+  if (total === 0) return 0;
+  return (workingHour / total) * 100;
+}
 
 const HomePage: React.FC = () => {
   const { t } = useTranslation();
@@ -42,7 +79,7 @@ const HomePage: React.FC = () => {
   const [fuelBarChartWeekly, setFuelBarChartWeekly] = useState<FormattedData[]>([]);
   const [fuelBarChartMonthly, setFuelBarChartMonthly] = useState<FormattedData[]>([]);
 
-  const [totalWorkingHour, setTotalWorkingHour] = useState<number>(0); //bu son 30 günün toplamını veriyor (donutta kullanıyoruz direkt)
+  const [totalWorkingHour, setTotalWorkingHour] = useState<number>(0); // son 30 günün toplamı (donutta kullanılıyor)
   const [last7Working, setLast7Working] = useState<number>(0);
 
   const [last7idle, setLast7Idle] = useState<number>(0);
@@ -52,6 +89,15 @@ const HomePage: React.FC = () => {
   const isRefreshing = useRef(false);
 
   const [timerInterval, setTimerInterval] = useState<number | null>(null); // null = henüz yüklenmedi
+
+  const [checkedOptions, setCheckedOptions] = useState<string[]>(allCheckedOptions);
+
+  const [selectedFuelOption, setSelectedFuelOption] = useState(0);
+  const [selectedWorkOption, setSelectedWorkOption] = useState(0);
+  const [selectedDonutOption, setSelectedDonutOption] = useState(0);
+
+  const [favoriteItems, setFavoriteItems] = useState<{ imageSrc?: string; id: number }[]>([]);
+  const [recentItems, setRecentItems] = useState<{ imageSrc?: string; id: number }[]>([]);
 
   // Timer ayarını kullanıcı tercihinden al
   useEffect(() => {
@@ -91,18 +137,8 @@ const HomePage: React.FC = () => {
     return () => clearInterval(interval);
   }, [timerInterval]);
 
-  //donut için yüzdelik hesaplama fonksiyonu
-  function calculateWorkingPercentage(workingHour: number, idleHour: number): number {
-    const active = workingHour;
-    const idle = idleHour;
-
-    const total = active + idle;
-    if (total === 0) return 0;
-    return ((active / total) * 100);
-  }
-
-  //Saate göre selamlama fonksiyonu
-  const getGreetingByTime = (name: string): string => {
+  // Saate göre selamlama
+  const getGreetingByTime = useCallback((name: string): string => {
     const hour = new Date().getHours();
     if (hour >= 5 && hour < 12) {
       return `${t("homePage.headers.morning")} ${name}`;
@@ -113,58 +149,20 @@ const HomePage: React.FC = () => {
     } else {
       return `${t("homePage.headers.night")} ${name}`;
     }
-  };
+  }, [t]);
 
-  function generateDummyChartData(count: number): FormattedData[] {
-    const weekdays = ["pzt", "sal", "çar", "per", "cum", "cmt", "paz"];
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // zamanı sıfırla
-
-    return Array.from({ length: count }).map((_, index) => {
-      const date = new Date(today);
-      date.setDate(today.getDate() - (count - index - 1)); // <-- bugün dahil
-
-      return {
-        value: 0,
-        dayName: weekdays[date.getDay() === 0 ? 6 : date.getDay() - 1],
-        dayNum: date.getDate(),
-        date: date.toISOString().split("T")[0],
-      };
-    });
-  }
-
-
-
-  //test commit
-
-
-
-  const [checkedOptions, setCheckedOptions] = useState<string[]>(allCheckedOptions);
-
-  const handleFilterBoxChange = (selected: string[]) => {
+  const handleFilterBoxChange = useCallback((selected: string[]) => {
     setCheckedOptions(selected);
-  };
+  }, []);
 
-  // subtype bazlı statik idle değerleri
-  const weeklyIdleValues: Record<string, number> = {
-    AE15: 4.5,
-    EL12: 3.2,
-    VM6: 1.7,
-  };
-
-  // aylık statik idle değerleri (subtype bazlı)
-  const monthlyIdleValues: Record<string, number> = {
-    AE15: 23.9,
-    EL12: 16.4,
-    VM6: 8.9,
-  };
-
+  // AĞIR HESAPLAMA: sadece filtre ya da cihaz listesi değişince çalışır.
+  // (Eski versiyon refreshTrigger'a bağlıydı; bu yüzden sadece stat yenilemesi
+  //  yapan her tikte tüm günlük toplamlar gereksiz yere baştan hesaplanıyordu.)
   useEffect(() => {
     const optionsToUse = checkedOptions.length > 0 ? checkedOptions : Object.keys(weeklyIdleValues);
 
-
-    const total30 = deviceWorkStore.getDailyFormatted("DailyPlatformHours", 31, optionsToUse)
-    const total7 = deviceWorkStore.getDailyFormatted("DailyPlatformHours", 7, optionsToUse)
+    const total30 = deviceWorkStore.getDailyFormatted("DailyPlatformHours", 31, optionsToUse);
+    const total7 = deviceWorkStore.getDailyFormatted("DailyPlatformHours", 7, optionsToUse);
 
     const total30Working = total30.reduce((acc, item) => acc + item.value, 0);
     const total7Working = total7.reduce((acc, item) => acc + item.value, 0);
@@ -172,131 +170,31 @@ const HomePage: React.FC = () => {
     setTotalWorkingHour(total30Working);
     setLast7Working(total7Working);
 
-
-
-    // haftalık idle
-    const idleTime = deviceWorkStore.getDailySummary("DailyGroundHours", 7, checkedOptions);
-    const idle7 = optionsToUse.reduce((acc, type) => acc + (weeklyIdleValues[type] || 0), 0);
-    setLast7Idle(idleTime);
-
-    // aylık idle
-    const idleTime30 = deviceWorkStore.getDailySummary("DailyGroundHours", 31, checkedOptions);
-    const idle30 = optionsToUse.reduce((acc, type) => acc + (monthlyIdleValues[type] || 0), 0);
-    setLast30Idle(idleTime30);
+    // haftalık / aylık idle
+    setLast7Idle(deviceWorkStore.getDailySummary("DailyGroundHours", 7, checkedOptions));
+    setLast30Idle(deviceWorkStore.getDailySummary("DailyGroundHours", 31, checkedOptions));
 
     setWorkingBarChartWeekly(total7);
-    const rawWorking = total30;
+
     const dummy30 = generateDummyChartData(31);
-    const completed = dummy30.map(d => {
-      const found = rawWorking.find(r => r.date === d.date);
-      return found ? found : d;
-    });
+    const completed = dummy30.map(d => total30.find(r => r.date === d.date) ?? d);
     setWorkingBarChartMonthly(completed);
+
     setFuelBarChartWeekly(deviceWorkStore.getDailyFormatted("DailyEnergyConsumption", 7, optionsToUse));
     setFuelBarChartMonthly(deviceWorkStore.getDailyFormatted("DailyEnergyConsumption", 30, optionsToUse));
-  }, [checkedOptions, deviceWorkStore.all.length, refreshTrigger]);
-
-
-
-  {/* 
-    useEffect(() => {
-    const total30 = deviceWorkStore.getDailySummary("DailyWorkingHours", 31, checkedOptions);
-    const idle30 = deviceWorkStore.getDailySummary("idleTime", 31, checkedOptions);
-    const total7 = deviceWorkStore.getDailySummary("DailyWorkingHours", 7, checkedOptions);
-    const idle7 = deviceWorkStore.getDailySummary("idleTime", 7, checkedOptions);
-
-    setTotalWorkingHour(total30);
-    //setLast30Idle(idle30 / (1000 * 60 * 60));
-        setLast30Idle(65.1);
-
-    setLast7Working(total7);
-//    setLast7Idle(idle7 / (1000 * 60 * 60));
-        setLast7Idle(9.86);
-
-
-    setWorkingBarChartWeekly(deviceWorkStore.getDailyFormatted("DailyWorkingHours", 7, checkedOptions));
-    const rawWorking = deviceWorkStore.getDailyFormatted("DailyWorkingHours", 31, checkedOptions);
-    const dummy30 = generateDummyChartData(31);
-    const completed = dummy30.map(d => {
-      const found = rawWorking.find(r => r.date === d.date);
-      return found ? found : d;
-    });
-    setWorkingBarChartMonthly(completed);
-    setFuelBarChartWeekly(deviceWorkStore.getDailyFormatted("DailyFuelCons", 7, checkedOptions));
-    setFuelBarChartMonthly(deviceWorkStore.getDailyFormatted("DailyFuelCons", 30, checkedOptions));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [checkedOptions, deviceWorkStore.all.length]);
-  */}
 
-
-  //donut grafiği data 
-  const weeklyDonutData: DonutData = {
-    activeWorking: last7Working,
-    idle: last7idle,
-    workingTime: calculateWorkingPercentage(last7Working, last7idle),
-  };
-
-  const monthlyDonutData: DonutData = {
-    activeWorking: totalWorkingHour,
-    idle: last30idle,
-    workingTime: calculateWorkingPercentage(totalWorkingHour, last30idle),
-  };
-
-  // Sum Bar fonksiyonları (subtype bazlı filtreleme)
-  function getFilteredDeviceCount(): number {
-    return deviceWorkStore.all.filter(device => {
-      // checkedOptions boşsa tüm cihazlar dahil edilir
-      if (checkedOptions.length === 0) return true;
-      return checkedOptions.includes(device.subtype);
-    }).length;
-  }
-
-
-  function getFilteredActiveDeviceCount(): number {
-    return deviceWorkStore.all
-      .filter(device => {
-        // checkedOptions boşsa tüm cihazlar dahil edilir
-        if (checkedOptions.length === 0) return true;
-        return checkedOptions.includes(device.subtype);
-      })
-      .filter(device => {
-        const latestStatusValue = deviceWorkStore.getTelemetry(device.id, "stat")?.at(-1)?.value;
-        return latestStatusValue === 1;
-      })
-      .length;
-  }
-
-
-  function lowMaintenanceCount(): number {
-    const result = deviceAttributes.all.map(([id, attrs]) => {
-      const remaining = attrs.find(a => a.key === "remainingHoursToMaintenance")?.value;
-      return {
-        deviceId: id,
-        remainingHours: remaining
-      };
-    });
-    const count = result.filter(entry => entry.remainingHours !== null && entry.remainingHours < 50).length;
-
-    return count;
-  }
-
-  const [selectedFuelOption, setSelectedFuelOption] = useState(0);
-  const [selectedWorkOption, setSelectedWorkOption] = useState(0);
-  const [selectedDonutOption, setSelectedDonutOption] = useState(0);
-
-
+  // justLoggedIn kontrolü
   useEffect(() => {
     const justLoggedIn = localStorage.getItem("justLoggedIn");
-
     if (justLoggedIn === "true") {
       localStorage.removeItem("justLoggedIn");
       window.location.reload();
     }
   }, []);
 
-  const [favoriteItems, setFavoriteItems] = useState<{ imageSrc?: string; id: number }[]>([]);
-  const [recentItems, setRecentItems] = useState<{ imageSrc?: string; id: number }[]>([]);
-
-  //--favoriler
+  // Favoriler & son kullanılanlar
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -324,9 +222,7 @@ const HomePage: React.FC = () => {
             id: fav.id,
             imageSrc: getMachineImage(fav.isTelehandlerV2 ? 'Telehandler_v2' : fav.type, "sm", fav.subtype),
           }));
-
         setFavoriteItems(mapped);
-
       } catch (err) {
         console.error("Recent machines alınamadı:", err);
       }
@@ -335,6 +231,51 @@ const HomePage: React.FC = () => {
     fetchData();
   }, []);
 
+  // ---- Sayım değerleri: render başına değil, sadece ilgili veriler değişince hesaplanır ----
+
+  // Filtreye uyan toplam cihaz sayısı (SumBar + ManualBarChart aynı değeri kullanır)
+  const filteredDeviceCount = useMemo(() => {
+    return deviceWorkStore.all.filter(device => {
+      if (checkedOptions.length === 0) return true;
+      return checkedOptions.includes(device.subtype);
+    }).length;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [checkedOptions, deviceWorkStore.all.length]);
+
+  // Aktif cihaz sayısı (stat'a bağlı olduğu için refreshTrigger'da yeniden hesaplanır)
+  const filteredActiveDeviceCount = useMemo(() => {
+    return deviceWorkStore.all
+      .filter(device => checkedOptions.length === 0 || checkedOptions.includes(device.subtype))
+      .filter(device => deviceWorkStore.getTelemetry(device.id, "stat")?.at(-1)?.value === 1)
+      .length;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [checkedOptions, deviceWorkStore.all.length, refreshTrigger]);
+
+  // Bakımı yaklaşan cihaz sayısı
+  const lowMaintenance = useMemo(() => {
+    return deviceAttributes.all.filter(([, attrs]) => {
+      const remaining = attrs.find(a => a.key === "remainingHoursToMaintenance")?.value;
+      return remaining !== null && remaining !== undefined && remaining < 50;
+    }).length;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deviceAttributes.all.length, refreshTrigger]);
+
+  // Dummy fallback verileri sabit referansla (her render'da yeniden üretilmesin)
+  const dummy7 = useMemo(() => generateDummyChartData(7), []);
+  const dummy31 = useMemo(() => generateDummyChartData(31), []);
+
+  // Donut verileri
+  const weeklyDonutData: DonutData = useMemo(() => ({
+    activeWorking: last7Working,
+    idle: last7idle,
+    workingTime: calculateWorkingPercentage(last7Working, last7idle),
+  }), [last7Working, last7idle]);
+
+  const monthlyDonutData: DonutData = useMemo(() => ({
+    activeWorking: totalWorkingHour,
+    idle: last30idle,
+    workingTime: calculateWorkingPercentage(totalWorkingHour, last30idle),
+  }), [totalWorkingHour, last30idle]);
 
   return (
     <>
@@ -355,7 +296,6 @@ const HomePage: React.FC = () => {
 
             <div className="flex items-center">
 
-
               <ManuelDonut
                 weeklyData={weeklyDonutData}
                 monthlyData={monthlyDonutData}
@@ -363,41 +303,35 @@ const HomePage: React.FC = () => {
                 selectedOption={selectedDonutOption}
               />
 
-
-
               <div className="w-[4px] h-[220px] flex bg-gray1 dark:bg-gray9 rounded-[4px] mx-[8px]"></div>
 
               <ManualBarChart
-                sampleDataWeekly={fuelBarChartWeekly.length > 0 ? fuelBarChartWeekly : generateDummyChartData(7)}
-                sampleDataMonthly={fuelBarChartMonthly.length > 0 ? fuelBarChartMonthly : generateDummyChartData(31)}
+                sampleDataWeekly={fuelBarChartWeekly.length > 0 ? fuelBarChartWeekly : dummy7}
+                sampleDataMonthly={fuelBarChartMonthly.length > 0 ? fuelBarChartMonthly : dummy31}
                 title={t("global.fuelGraphTitle")}
                 type="blue"
                 onSelectOption={setSelectedWorkOption}
                 selectedOption={selectedWorkOption}
                 idealConsumption={7}
-                machineCount={getFilteredDeviceCount()}
+                machineCount={filteredDeviceCount}
                 isIdealConsumption={true}
               />
 
               <div className="w-[4px] h-[220px] flex bg-gray1 dark:bg-gray9 rounded-[4px] mx-[8px]"></div>
 
               <ManualBarChart
-
-                sampleDataWeekly={workingBarChartWeekly.length > 0 ? workingBarChartWeekly : generateDummyChartData(7)}
-                sampleDataMonthly={workingBarChartMonthly.length > 0 ? workingBarChartMonthly : generateDummyChartData(31)}
+                sampleDataWeekly={workingBarChartWeekly.length > 0 ? workingBarChartWeekly : dummy7}
+                sampleDataMonthly={workingBarChartMonthly.length > 0 ? workingBarChartMonthly : dummy31}
                 title={t("global.workingGraphTitle")}
                 type="orange"
                 onSelectOption={setSelectedFuelOption}
                 selectedOption={selectedFuelOption}
-
-
               />
-
 
             </div>
             <div className="w-[1100px] h-[3px] flex bg-gray1 dark:bg-gray9 rounded-[4px] my-[13px]"></div>
 
-            <SumBar value1={0} value2={lowMaintenanceCount()} value3={getFilteredDeviceCount()} value4={getFilteredActiveDeviceCount()} />
+            <SumBar value1={0} value2={lowMaintenance} value3={filteredDeviceCount} value4={filteredActiveDeviceCount} />
 
           </div>
 

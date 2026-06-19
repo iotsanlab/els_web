@@ -1,10 +1,10 @@
-import { View, Text } from "@react-pdf/renderer";
+import React from "react";
 import styles from "./dailystyle";
 import { useTranslation } from "react-i18next";
 
-interface TableRow {
+export interface TableRow {
   mode: string;
-  values: number[];
+  values: (string | number)[];
   styleKey: string;
 }
 
@@ -14,18 +14,13 @@ interface DailyWorkingTableProps {
 }
 
 // Geçerli stil anahtarlarını kontrol etmek için yardımcı fonksiyon
-const getStyleByKey = (styles: Record<string, any>, key: string) => {
-  // Geçerli anahtarlar
-  const validKeys = ['rolanti', 'eco', 'power', 'powerPlus', 'fuelTotal', 'fuelAvg'];
-  
-  // Eğer anahtar geçerliyse stili döndür, değilse boş stil objesi döndür
-  return validKeys.includes(key) ? styles[key] || {} : {};
+const getStyleByKey = (stylesObj: Record<string, React.CSSProperties>, key: string): React.CSSProperties => {
+  const validKeys = ['rolanti', 'eco', 'power', 'powerPlus', 'fuelTotal', 'fuelAvg', 'standart'];
+  return validKeys.includes(key) ? stylesObj[key] || {} : {};
 };
 
 /**
  * Dinamik çalışma saatleri tablosu component'i
- * @param {DailyWorkingTableProps} props - Component özellikleri
- * @returns {JSX.Element} Tablo component'i
  */
 const DailyWorkingTable = ({
   hours = Array.from({ length: 24 }, (_, i) => i + 1),
@@ -33,45 +28,45 @@ const DailyWorkingTable = ({
 }: DailyWorkingTableProps) => {
   const { t } = useTranslation();
   return (
-    <View style={styles.table}>
+    <div style={styles.table}>
       {/* Saat Başlık Satırı */}
-      <View style={styles.tableRow}>
+      <div style={styles.tableRow}>
         {/* Mod başlık hücresi */}
-        <View style={[styles.tableCol, styles.modCol, styles.headerCell]}>
-          <Text style={styles.tableHeaderText}>{t("documentPage.date")}</Text>
-        </View>
-        
+        <div style={{ ...styles.tableCol, ...styles.modCol, ...styles.headerCell }}>
+          <span style={styles.tableHeaderText}>{t("documentPage.date")}</span>
+        </div>
+
         {/* Saat başlıkları */}
         {hours.map((hour, index) => (
-          <View key={`hour-${index}`} style={[styles.tableCol, styles.headerCell]}>
-            <Text style={styles.tableHeaderText}>{hour}</Text>
-          </View>
+          <div key={`hour-${index}`} style={{ ...styles.tableCol, ...styles.headerCell }}>
+            <span style={styles.tableHeaderText}>{hour}</span>
+          </div>
         ))}
-      </View>
+      </div>
 
       {/* Mod Veri Satırları */}
       {rows.map((row) => (
-        <View key={`mode-${row.mode}`} style={styles.tableRow}>
+        <div key={`mode-${row.mode}`} style={styles.tableRow}>
           {/* Mod başlığı */}
-          <View style={[styles.tableCol, styles.modCol, getStyleByKey(styles, row.styleKey)]}>
-            <Text style={styles.tableCellText}>{row.mode}</Text>
-          </View>
-          
+          <div style={{ ...styles.tableCol, ...styles.modCol, ...getStyleByKey(styles, row.styleKey) }}>
+            <span style={styles.tableCellText}>{row.mode}</span>
+          </div>
+
           {/* Her saat için veri hücreleri */}
           {row.values.map((value, hourIndex) => (
-            <View 
-              key={`${row.mode}-${hourIndex}`} 
-              style={[
-                styles.tableCol, 
-                getStyleByKey(styles, row.styleKey)
-              ]}
+            <div
+              key={`${row.mode}-${hourIndex}`}
+              style={{
+                ...styles.tableCol,
+                ...getStyleByKey(styles, row.styleKey),
+              }}
             >
-              <Text style={styles.tableCellText}>{value}</Text>
-            </View>
+              <span style={styles.tableCellText}>{value}</span>
+            </div>
           ))}
-        </View>
+        </div>
       ))}
-    </View>
+    </div>
   );
 };
 

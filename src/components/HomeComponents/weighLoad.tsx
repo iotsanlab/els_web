@@ -33,6 +33,13 @@ const WeighLoad = ({ value, desc1, desc2, desc3 }: WeighLoadProps) => {
       tooltip: {
         enabled: false,
       },
+      dataLabels: {
+        enabled: true,
+        formatter: (val: any, opts: any) => {
+          if (opts.dataPointIndex === 1) return '';
+          return `${Math.round(opts.w.globals.series[0])}%`;
+        }
+      },
       // Yüzdeyi ortada göstermek için annotations
       annotations: {
         position: 'front',
@@ -74,8 +81,8 @@ const WeighLoad = ({ value, desc1, desc2, desc3 }: WeighLoadProps) => {
           },
         },
       ],
-      // Çizgi renklerini kırmızı ve yeşil yapma
-      colors: isDarkMode ? ['#424D57', '#e12627'] : ['#B9C2CA', '#e12627'],
+      // Çizgi renklerini kırmızı (yük) ve gri (boş/kalan) yapma
+      colors: isDarkMode ? ['#e12627', '#424D57'] : ['#e12627', '#B9C2CA'],
     },
   });
 
@@ -92,6 +99,16 @@ const WeighLoad = ({ value, desc1, desc2, desc3 }: WeighLoadProps) => {
             endAngle: 90,
             offsetY: 10,
           },
+        },
+        tooltip: {
+          enabled: false,
+        },
+        dataLabels: {
+          enabled: true,
+          formatter: (val: any, opts: any) => {
+            if (opts.dataPointIndex === 1) return '';
+            return `${Math.round(opts.w.globals.series[0])}%`;
+          }
         },
         annotations: {
           position: 'front',
@@ -131,7 +148,7 @@ const WeighLoad = ({ value, desc1, desc2, desc3 }: WeighLoadProps) => {
             },
           },
         ],
-        colors: isDarkMode ? ['#424D57', '#e12627'] : ['#B9C2CA', '#e12627'],
+        colors: isDarkMode ? ['#e12627', '#424D57'] : ['#e12627', '#B9C2CA'],
       },
     });
   }, [value, isDarkMode, percentage]);

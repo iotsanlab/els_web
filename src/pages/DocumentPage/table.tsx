@@ -1,5 +1,5 @@
-import { View, Text } from "@react-pdf/renderer"
-import styles from "./style"
+import React from "react";
+import styles from "./style";
 
 interface Column {
   key: string;
@@ -11,6 +11,12 @@ interface Row {
   [key: string]: string;
 }
 
+interface FooterCell {
+  value: string;
+  colspan?: number;
+  style?: React.CSSProperties;
+}
+
 interface PDFTableProps {
   columns: Column[];
   rows: Row[];
@@ -19,9 +25,10 @@ interface PDFTableProps {
   colorScheme?: {
     [key: string]: React.CSSProperties;
   };
+  footer?: FooterCell[][];
 }
 
-const PDFTable = ({ 
+const PDFTable = ({
   columns = [
     { key: 'machineName', header: 'Makine Adı' },
     { key: 'serialNumber', header: 'Seri Numarası' },
@@ -48,46 +55,70 @@ const PDFTable = ({
   ],
   headerStyle = styles.tableHeader,
   cellStyle = styles.tableCell,
-  colorScheme = {}
+  colorScheme = {},
+  footer = []
 }: PDFTableProps) => {
-    return (
-        <View style={styles.table}>
-        {/* Tablo Başlık Satırı */}
-        <View style={styles.tableRow}>
-            {columns.map((column, index) => (
-                <View 
-                    key={index} 
-                    style={[
-                        styles.tableCol, 
-                        headerStyle, 
-                        column.style, 
-                        colorScheme[column.key]
-                    ]}
-                >
-                    <Text style={styles.tableHeaderText}>{column.header}</Text>
-                </View>
-            ))}
-        </View>
-        {/* Tablo Veri Satırları */}
-        {rows.map((row, rowIndex) => (
-            <View key={rowIndex} style={styles.tableRow}>
-                {columns.map((column, colIndex) => (
-                    <View 
-                        key={`${rowIndex}-${colIndex}`} 
-                        style={[
-                            styles.tableNoColBorder,
+  const totalColumns = columns.length;
 
-                            column.style, 
-                            colorScheme[column.key]
-                        ]}
-                    >
-                        <Text style={styles.tableCell}>{row[column.key] || ''}</Text>
-                    </View>
-                ))}
-            </View>
+  return (
+    <div style={styles.table}>
+      {/* Tablo Başlık Satırı */}
+      <div style={styles.tableRow}>
+        {columns.map((column, index) => (
+          <div
+            key={index}
+            style={{
+              ...styles.tableCol,
+              ...headerStyle,
+              ...column.style,
+              ...colorScheme[column.key],
+            }}
+          >
+            <span style={styles.tableHeaderText}>{column.header}</span>
+          </div>
         ))}
-    </View>
-    )
-}
+      </div>
+      {/* Tablo Veri Satırları */}
+      {rows.map((row, rowIndex) => (
+        <div key={rowIndex} style={styles.tableRow}>
+          {columns.map((column, colIndex) => (
+            <div
+              key={`${rowIndex}-${colIndex}`}
+              style={{
+                ...styles.tableNoColBorder,
+                ...column.style,
+                ...colorScheme[column.key],
+              }}
+            >
+              <span style={styles.tableCell}>{row[column.key] || ''}</span>
+            </div>
+          ))}
+        </div>
+      ))}
+      {/* Tablo Footer Satırları (tfoot) */}
+      {footer.length > 0 && footer.map((footerRow, footerRowIndex) => (
+        <div key={`footer-${footerRowIndex}`} style={{ ...styles.tableRow, borderTop: '1px solid #000' }}>
+          {footerRow.map((cell, cellIndex) => {
+            const colspan = cell.colspan || 1;
+            const widthPercent = `${(colspan / totalColumns) * 100}%`;
+            return (
+              <div
+                key={`footer-${footerRowIndex}-${cellIndex}`}
+                style={{
+                  ...styles.tableNoColBorder,
+                  flexBasis: widthPercent,
+                  flexGrow: 0,
+                  ...cell.style,
+                }}
+              >
+                <span style={{ ...styles.tableCell, fontWeight: 'bold' }}>{cell.value}</span>
+              </div>
+            );
+          })}
+        </div>
+      ))}
+    </div>
+  );
+};
 
 export default PDFTable;

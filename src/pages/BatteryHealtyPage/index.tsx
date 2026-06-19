@@ -211,30 +211,35 @@ const BatteryHealtyPage = () => {
     fetchAttributes();
   }, [id]);
 
-  // Şarj deseni verilerini çek
+  // Son 24 saatlik CumulativeCharge verisini saate göre grupla → bar chart verisi
   useEffect(() => {
     if (!id) return;
 
     const fetchChargingPattern = async () => {
       try {
-        const response = await getValuesTimeSeries("DEVICE", id, ["chargingPattern"]);
+        const endDate = Date.now();
+        const startDate = endDate - 7 * 24 * 60 * 60 * 1000;
 
-        if (response?.chargingPattern && response.chargingPattern.length > 0) {
-          // chargingPattern verisi varsa parse et
-          const patternValue = response.chargingPattern[0]?.value;
-          if (patternValue) {
-            try {
-              const parsed = typeof patternValue === 'string' ? JSON.parse(patternValue) : patternValue;
-              if (Array.isArray(parsed)) {
-                setChargingPatternData(parsed);
-              }
-            } catch {
-              // JSON parse başarısızsa statik veri kullanılır
-            }
-          }
-        }
+        const response = await getValuesTimeSeries("DEVICE", id, ["BatteryLevelDaily"], startDate, endDate, true);
+
+        const raw: any[] = (response as any)?.BatteryLevelDaily || [];
+        if (!raw.length) return;
+
+        const sorted = [...raw].sort((a: any, b: any) => a.ts - b.ts);
+
+        const patternData = sorted.map((entry: any) => {
+          const d = new Date(entry.ts);
+          const day = String(d.getDate()).padStart(2, '0');
+          const month = String(d.getMonth() + 1).padStart(2, '0');
+          return {
+            hour: `${day}/${month}`,
+            value: Math.min(100, Math.round(parseFloat(entry.value))),
+          };
+        });
+
+        setChargingPatternData(patternData);
       } catch (error) {
-        console.error("Charging pattern fetch error:", error);
+        console.error("CumulativeCharge pattern fetch error:", error);
       }
     };
 

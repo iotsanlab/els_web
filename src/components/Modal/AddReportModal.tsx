@@ -1,12 +1,11 @@
 import { Dialog, DialogBackdrop, DialogPanel } from "@headlessui/react";
-import { Fragment, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import Divider from "../Divider";
 import { SvgIcons } from "../../assets/icons/SvgIcons";
 import Select from "../Select";
 import TreeCheckbox from "../TreeCheckbox";
 import { useTranslation } from 'react-i18next';
 import CalendarComponent from "../Calendar";
-import { reportStore } from "../../store/ReportStore";
 
 
 interface CheckboxItem {
@@ -42,7 +41,35 @@ const AddReportModal = ({ isOpen, onClose, onSubmit }: Props) => {
   const [reportName, setReportName] = useState<string>("");
   const [selectedReport, setSelectedReport] = useState<string | undefined>(undefined);
   const [selectedDate, setSelectedDate] = useState<string>("");
+  const [selectedDateRange, setSelectedDateRange] = useState<[Date | null, Date | null]>([null, null]);
   const [selectedMachines, setSelectedMachines] = useState<CheckboxItem[]>([]);
+
+  const resetFormState = () => {
+    setReportName("");
+    setSelectedReport(undefined);
+    setSelectedDate("");
+    setSelectedDateRange([null, null]);
+    setSelectedMachines([]);
+    setStep("1");
+    setErrors({});
+    SetCalendarOpen(false);
+  };
+
+  const handleModalClose = () => {
+    resetFormState();
+    onClose();
+  };
+
+
+  useEffect(() => {
+    selectedMachines.forEach(machine => {
+      machine.children?.forEach(child => {
+        if (child.checked) {
+          setSelectedMachines(prev => [...prev, child]);
+        }
+      });
+    });
+  }, []);
 
   // Validation state
   const [errors, setErrors] = useState<{
@@ -97,27 +124,20 @@ const AddReportModal = ({ isOpen, onClose, onSubmit }: Props) => {
     if (validateStep2()) {
       const formData: ReportFormData = {
         reportName,
-        reportType: selectedReport,
+        reportType: selectedReport ?? "",
         dateRange: selectedDate,
         selectedMachines: selectedMachines,
       };
-  
+
       onSubmit(formData); // Rapor verisini üst bileşene gönderiyoruz
-  
-      // Form verilerini sıfırlıyoruz
-      setReportName("");
-      setSelectedReport("");
-      setSelectedDate("");
-      setSelectedMachines([]);
-      setStep("1");
-      setErrors({});
-      onClose(); // Modal'ı kapatıyoruz
+
+      handleModalClose(); // Kaydet sonrası modalı kapat + state sıfırla
     }
   };
-  
+
 
   const handleMachineSelection = (items: CheckboxItem[]) => {
-    const selected = items.flatMap(item => 
+    const selected = items.flatMap(item =>
       item.children?.filter(child => child.checked).map(child => ({
         id: child.id,
         label: child.label,
@@ -127,43 +147,38 @@ const AddReportModal = ({ isOpen, onClose, onSubmit }: Props) => {
         checked: true,
       })) || []
     );
-  
+
     setSelectedMachines(selected); // State'i güncelliyoruz
-  
+
     if (errors.selectedMachines) {
       setErrors(prev => ({ ...prev, selectedMachines: undefined }));
     }
   };
-  
 
-  const handleDateChange = (newDate: Date) => {
-    setSelectedDate(newDate.toLocaleDateString()); // Tarihi doğru formatta state'e kaydediyoruz
-    SetCalendarOpen(false); // Takvimi kapatıyoruz
-  };
 
   const REPORT_OPTIONS = [
     { label: t("global.schema1"), value: "hours" },
     { label: t("global.schema2"), value: "fuel" },
+    { label: t("global.schema3"), value: "performance" },
   ];
-  
+
 
   return (
-   <>
-    <Dialog
-      as="div"
-      open={isOpen}
-      onClose={onClose}
-      className="relative z-30"
-      initialFocus={initialFocusRef}
-    >
-      <div className="fixed inset-0 z-10 overflow-y-auto ">
-        <div className="flex items-center justify-center min-h-screen p-4 text-center select-none sm:p-0">
-          <DialogBackdrop as={Fragment}>
-            <div className="fixed inset-0 transition-opacity bg-gray-500/75" />
-          </DialogBackdrop>
+    <>
+      <Dialog
+        as="div"
+        open={isOpen}
+        onClose={handleModalClose}
+        className="relative z-30"
+        initialFocus={initialFocusRef}
+      >
+        <div className="fixed inset-0 z-10 overflow-y-auto ">
+          <div className="flex items-center justify-center min-h-screen p-4 text-center select-none sm:p-0">
+            <DialogBackdrop as={Fragment}>
+              <div className="fixed inset-0 transition-opacity bg-gray-500/75" />
+            </DialogBackdrop>
 
-          <DialogPanel as={Fragment}>
-            <div
+            <DialogPanel
               className="
               relative px-[30px] py-[34px] overflow-hidden bg-gray1 dark:bg-gray10 rounded-[20px] shadow-xl transition-all transform flex flex-col
               w-[560px] h-[750px]
@@ -174,7 +189,7 @@ const AddReportModal = ({ isOpen, onClose, onSubmit }: Props) => {
                 <span className="text-gray4 text-left font-[700] text-[20px] font-inter leading-relaxed tracking-wide">
                   {t("reportPop.header")}
                 </span>
-                <div className="cursor-pointer" onClick={onClose}>
+                <div className="cursor-pointer" onClick={handleModalClose}>
                   <SvgIcons iconName="Close" fill="#B9C2CA" />
                 </div>
               </div>
@@ -229,26 +244,25 @@ const AddReportModal = ({ isOpen, onClose, onSubmit }: Props) => {
                     </div>
 
                     <div className="mb-4">
-                    <Select
-  options={REPORT_OPTIONS.map(opt => opt.label)}
-  value={
-    REPORT_OPTIONS.find(opt => opt.value === selectedReport)?.label ||
-    t("reportPop.option-1")
-  }
-  onChange={(label) => {
-    const matched = REPORT_OPTIONS.find(opt => opt.label === label);
-    if (matched) {
-      setSelectedReport(matched.value); // Artık "hours" veya "fuel" olarak kaydedecek
-    }
-    if (errors.selectedReport) {
-      setErrors(prev => ({ ...prev, selectedReport: undefined }));
-    }
-  }}
-  className={`min-h-[44px] items-center justify-between shadow dark:bg-gray9 ${
-    errors.selectedReport ? "border-red-500" : ""
-  }`}
-  isArrow={true}
-/>
+                      <Select
+                        options={REPORT_OPTIONS.map(opt => opt.label)}
+                        value={
+                          REPORT_OPTIONS.find(opt => opt.value === selectedReport)?.label ||
+                          t("reportPop.option-1")
+                        }
+                        onChange={(label) => {
+                          const matched = REPORT_OPTIONS.find(opt => opt.label === label);
+                          if (matched) {
+                            setSelectedReport(matched.value); // Artık "hours" veya "fuel" olarak kaydedecek
+                          }
+                          if (errors.selectedReport) {
+                            setErrors(prev => ({ ...prev, selectedReport: undefined }));
+                          }
+                        }}
+                        className={`min-h-[44px] items-center justify-between shadow dark:bg-gray9 ${errors.selectedReport ? "border-red-500" : ""
+                          }`}
+                        isArrow={true}
+                      />
 
                       {errors.selectedReport && (
                         <p className="mt-1 text-sm text-left text-red-500">{errors.selectedReport}</p>
@@ -256,19 +270,19 @@ const AddReportModal = ({ isOpen, onClose, onSubmit }: Props) => {
                     </div>
 
                     <div className="mb-4 cursor-pointer" >
-                      <div  className="
+                      <div className="
                       drop-shadow-[2px_2px_4px_#00000026]
                       flex w-full min-h-[44px] 
                       cursor-default rounded-[5px] bg-white dark:bg-gray9
                       items-center justify-between
                       focus:bg-white focus:border-0 focus:outline-none pr-2 pl-3 text-gray10 hover:border-0 border-mstYellow border-0 cursor-pointer"
-                      onClick={() => SetCalendarOpen(!calendarOpen)}>
-         
-                      <span className="block truncate font-inter font-medium text-[12px] dark:text-white">{selectedDate || t("global.selectDate")}</span>
-                      <SvgIcons iconName='DownArrow' fill='#B9C2CA'/>
+                        onClick={() => SetCalendarOpen(!calendarOpen)}>
+
+                        <span className="block truncate font-inter font-medium text-[12px] dark:text-white">{selectedDate || t("global.selectDate")}</span>
+                        <SvgIcons iconName='DownArrow' fill='#B9C2CA' />
 
                       </div>
-                     
+
                       {errors.selectedDate && (
                         <p className="mt-1 text-sm text-left text-red-500">{errors.selectedDate}</p>
                       )}
@@ -276,7 +290,7 @@ const AddReportModal = ({ isOpen, onClose, onSubmit }: Props) => {
                   </div>
                   :
                   <div>
-                    <TreeCheckbox onChange={handleMachineSelection} isAllNotVisible={true} />
+                    <TreeCheckbox onChange={handleMachineSelection} emitInitialOnChange={true} />
                     {errors.selectedMachines && (
                       <p className="mt-1 text-sm text-left text-red-500">{errors.selectedMachines}</p>
                     )}
@@ -289,7 +303,7 @@ const AddReportModal = ({ isOpen, onClose, onSubmit }: Props) => {
               <div className="flex items-center justify-end gap-3 mt-[20px]">
                 <div
                   className="rounded-[10px] bg-white dark:bg-gray9 px-9 py-2 font-inter text-[14px] font-bold text-gray10 dark:text-white shadow-xs cursor-pointer"
-                  onClick={step == "2" ? onBack : onClose}
+                  onClick={step == "2" ? onBack : handleModalClose}
                 >
                   {step == "1" ? t("reportPop.cancel") : t("global.back")}
                 </div>
@@ -302,29 +316,37 @@ const AddReportModal = ({ isOpen, onClose, onSubmit }: Props) => {
                 </div>
               </div>
               {calendarOpen && (
-  <div className="absolute flex items-center justify-center pt-[450px] pl-[250px]">
-    <CalendarComponent 
-      onClose={() => SetCalendarOpen(false)}  // Takvimi kapat
-      onDateSelect={(startDate: Date, endDate: Date) => {
-        setSelectedDate(`${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`); 
-      }}  // Seçilen tarih aralığını state'e kaydet
-    />
-  </div>
-)}
+                <div
+                  className="absolute inset-0 z-50"
+                  onMouseDown={() => SetCalendarOpen(false)}
+                >
+                  <div
+                    className="absolute flex items-center justify-center pt-[450px] pl-[250px]"
+                    onMouseDown={(e) => e.stopPropagation()}
+                  >
+                    <CalendarComponent
+                      onClose={() => SetCalendarOpen(false)}  // Takvimi kapat
+                      value={selectedDateRange}
+                      onDateSelect={(startDate: Date, endDate: Date) => {
+                        setSelectedDateRange([startDate, endDate]);
+                        setSelectedDate(`${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`);
+                      }}  // Seçilen tarih aralığını state'e kaydet
+                    />
+                  </div>
+                </div>
+              )}
 
 
 
-            </div>
-            
-          </DialogPanel>
-          
+            </DialogPanel>
+
+          </div>
+
         </div>
-        
-      </div>
-    
-    </Dialog>
-   
-      </>
+
+      </Dialog>
+
+    </>
   );
 };
 

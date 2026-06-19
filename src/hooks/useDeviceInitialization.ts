@@ -17,10 +17,10 @@ const BATCH_SIZE = 500;
 const BATCH_SIZE_LIGHT = 50; // Daha küçük batch boyutu - hafif sorgular için
 
 const TELEMETRY_KEYS = {
-  daily: ['DailyWorkingHours', 'DailyFuelCons', 'idleTime', 'ECOHOUR1Daily', 'STDHOUR1Daily', 'PWRHOUR1Daily', 'PWR_PLUSHOUR1Daily', 'DailyIdleHours', 'last30EngHours', 'last30FuelCons', 'last60EngHours', 'last60FuelCons', 'last14IdleHours', 'last7IdleHours', 'DailyEnergyConsumption', 'DailyPlatformHours','DailyGroundHours'],
-  status: ['stat', 'latitude', 'longitude', 'FuelLevel', 'EngFuelRate', 'WorkingHours', 'EngTotalFuelUsed', 'UreaTankLevel', 'ADBlue', 'TotalEnergyConsumption'],
-  warnings: ['src', 'spn', 'fmi', 'hrs', 'ts'],
-};  
+  daily: ['DailyWorkingHours', 'last30EngHours', 'last60EngHours', 'DailyEnergyConsumption', 'DailyPlatformHours', 'DailyGroundHours'],
+  status: ['stat', 'latitude', 'longitude', 'WorkingHours'],
+  warnings: [],
+};
 
 function getUtcDateRange() {
   const now = new Date();
@@ -92,16 +92,48 @@ function updateTelemetryStore(id: string, telemetryData: Record<string, any[]>) 
 function updateLocationData(id: string, status: any) {
   const latestLat = status.latitude?.at(-1)?.value;
   const latestLong = status.longitude?.at(-1)?.value;
-  
+
   machineStore.setMachineData(id, {
     lat: latestLat != null ? parseFloat(latestLat) : 0,
     long: latestLong != null ? parseFloat(latestLong) : 0,
   });
 }
 
+// Tek bir batch'i yükler: attribute + telemetri PARALEL çekilir,
+// store'a yazma sırası orijinaldeki gibi korunur (önce attribute, sonra telemetri).
+async function loadDeviceBatch(batch: Device[], startDate: number, endDate: number) {
+  const [attributeResults, telemetryResults] = await Promise.all([
+    Promise.all(batch.map(fetchDeviceAttributes)),
+    Promise.all(batch.map((device) => fetchDeviceTelemetry(device, startDate, endDate))),
+  ]);
+
+  attributeResults.forEach(({ id, details }) => {
+    const attrMap = new Map(details.map(({ key, value }) => [key, value]));
+    updateMachineStore(id, attrMap);
+    deviceAttributes.setDeviceAttributes(id, details);
+  });
+
+  telemetryResults.forEach(({ id, daily, status }) => {
+    updateTelemetryStore(id, daily);
+    updateTelemetryStore(id, status);
+    updateLocationData(id, status);
+  });
+}
+
 export function useDeviceInitialization() {
   const [isLoading, setIsLoading] = useState(true);
   const [devices, setDevices] = useState<Device[]>([]);
+
+  // Asset ID'yi tek başına (hızlı) çek - uyarı yüklemesini beklemesin
+  const fetchAssetId = useCallback(async () => {
+    try {
+      const response: IAssetResponse = await getUserAssetId();
+      const assetId = response?.data?.[0]?.id?.id;
+      if (assetId) userStore.setAssetId(assetId);
+    } catch (error) {
+      console.error('Asset id fetch error:', error);
+    }
+  }, []);
 
   const fetchWarnings = useCallback(async (deviceList: Device[]) => {
     if (!deviceList.length) return;
@@ -112,14 +144,6 @@ export function useDeviceInitialization() {
           getValuesTimeSeries(device.entityType, device.id, TELEMETRY_KEYS.warnings)
         )
       );
-
-      // get Asset ID
-      const response: IAssetResponse = await getUserAssetId();
-      console.log(response, 'response test edelim');
-      if (response) {
-        const assetId = response?.data?.[0]?.id?.id;
-        userStore.setAssetId(assetId);
-      }
 
       results.forEach(({ id, type, telemetry }) => {
         Object.entries(telemetry || {}).forEach(([key, entries]) => {
@@ -163,45 +187,39 @@ export function useDeviceInitialization() {
       setIsLoading(true);
 
       const response = await getDevices();
-      if (!response?.data?.length) return;
+      if (!response?.data?.length) return; // finally setIsLoading(false) çalışır
 
       const formattedDevices = formatDevices(response.data);
       allDevices.setDevices(formattedDevices);
       setDevices(formattedDevices);
 
+      // Asset ID'yi arka planda hemen al (ekranı bloklamaz)
+      void fetchAssetId();
+
       const { startDate, endDate } = getUtcDateRange();
       const batches = createBatches(formattedDevices, BATCH_SIZE);
 
-      for (const batch of batches) {
-        // Fetch attributes
-        const attributeResults = await Promise.all(batch.map(fetchDeviceAttributes));
-        
-        attributeResults.forEach(({ id, details }) => {
-          const attrMap = new Map(details.map(({ key, value }) => [key, value]));
-          updateMachineStore(id, attrMap);
-          deviceAttributes.setDeviceAttributes(id, details);
-        });
-
-        // Fetch telemetry
-        const telemetryResults = await Promise.all(
-          batch.map((device) => fetchDeviceTelemetry(device, startDate, endDate))
-        );
-
-        telemetryResults.forEach(({ id, daily, status }) => {
-          updateTelemetryStore(id, daily);
-          updateTelemetryStore(id, status);
-          updateLocationData(id, status);
-        });
+      // İlk batch ilk ekranı render etmek için yeterli; sadece onu bekle.
+      if (batches.length > 0) {
+        await loadDeviceBatch(batches[0], startDate, endDate);
       }
+      // İlk batch gelir gelmez ekranı aç (finally de güvence olarak false yapar)
+      setIsLoading(false);
 
-      // Fetch warnings after main data
-      await fetchWarnings(formattedDevices);
+      // Kalan batch'leri ve uyarıları ARKA PLANDA yükle - store observable
+      // olduğu için ekran veriler geldikçe kendiliğinden dolar.
+      void (async () => {
+        for (let i = 1; i < batches.length; i++) {
+          await loadDeviceBatch(batches[i], startDate, endDate);
+        }
+        await fetchWarnings(formattedDevices);
+      })();
     } catch (error) {
       console.error('Initialization error:', error);
     } finally {
       setIsLoading(false);
     }
-  }, [fetchWarnings]);
+  }, [fetchWarnings, fetchAssetId]);
 
   useEffect(() => {
     initialize();
@@ -236,6 +254,37 @@ export async function refreshAllTelemetry(): Promise<void> {
     }
   } catch (error) {
     console.error('Telemetry refresh error:', error);
+  }
+}
+
+// Harita için optimize edilmiş standalone fonksiyon - sadece konum ve durum bilgisi yeniler
+// refreshAllTelemetry'nin aksine 60 günlük daily veri çekmez; main thread'i bloklama riski çok daha düşük
+export async function refreshMapTelemetry(): Promise<void> {
+  const deviceList = allDevices.all;
+  if (!deviceList.length) return;
+
+  try {
+    const batches = createBatches(deviceList, BATCH_SIZE_LIGHT);
+
+    for (const batch of batches) {
+      const statusResults = await Promise.all(
+        batch.map(async (device) => {
+          const status = await getValuesTimeSeries(
+            device.entityType,
+            device.id,
+            TELEMETRY_KEYS.status // lat, longitude, stat, WorkingHours
+          );
+          return { id: device.id, status };
+        })
+      );
+
+      statusResults.forEach(({ id, status }) => {
+        updateTelemetryStore(id, status);
+        updateLocationData(id, status);
+      });
+    }
+  } catch (error) {
+    console.error('Map telemetry refresh error:', error);
   }
 }
 

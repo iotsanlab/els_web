@@ -27,12 +27,14 @@ interface TreeCheckboxProps {
   items?: CheckboxItem[];
   onChange?: (items: CheckboxItem[]) => void;
   isAllNotVisible?: boolean;
+  emitInitialOnChange?: boolean;
 }
 
-const TreeCheckbox: React.FC<TreeCheckboxProps> = ({ 
-  items: initialItems, 
-  onChange, 
-  isAllNotVisible = false 
+const TreeCheckbox: React.FC<TreeCheckboxProps> = ({
+  items: initialItems,
+  onChange,
+  isAllNotVisible = false,
+  emitInitialOnChange = false,
 }) => {
   const { t } = useTranslation();
   const [selectedType, setSelectedType] = useState<string | null>(null);
@@ -91,6 +93,14 @@ const TreeCheckbox: React.FC<TreeCheckboxProps> = ({
       setItems(machineListItems);
     }
   }, [machineListItems, initialItems]);
+
+  // Başlangıçta onChange'i tetikle (tüm araçlar seçili geldiğinde state'in dolu gelmesi için)
+  useEffect(() => {
+    if (emitInitialOnChange && onChange) {
+      onChange(machineListItems);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Indeterminate durumunu hesapla
   const calculateIndeterminate = useCallback((items: CheckboxItem[]) => {

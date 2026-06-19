@@ -1,27 +1,25 @@
-import { StyleSheet } from '@react-pdf/renderer';
+import React from 'react';
 
-const styles = StyleSheet.create({
+const styles: Record<string, React.CSSProperties> = {
   // Genel konteyner stilleri
   viewer: {
     width: '100%',
     height: '100vh',
-    fontFamily: 'Roboto',
+    fontFamily: 'Roboto, sans-serif',
   },
   page: {
     backgroundColor: '#fff',
     padding: 10,
     borderRadius: 5,
-    fontFamily: 'Roboto',
+    fontFamily: 'Roboto, sans-serif',
   },
-  
+
   // Tablo stilleri
   table: {
     display: 'flex',
     flexDirection: 'column',
     width: 'auto',
-    borderStyle: 'solid',
-    borderWidth: 1,
-    borderColor: '#000',
+    border: '1px solid #ddd',
     marginBottom: 15,
   },
   tableRow: {
@@ -33,12 +31,8 @@ const styles = StyleSheet.create({
     minWidth: 50,
     height: 20,
     padding: 2,
-    borderRightWidth: 1,
-    borderRightColor: '#000',
-    borderRightStyle: 'solid',
-    borderBottomWidth: 1,
-    borderBottomColor: '#000',
-    borderBottomStyle: 'solid',
+    borderRight: '1px solid #ddd',
+    borderBottom: '1px solid #ddd',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
@@ -47,9 +41,9 @@ const styles = StyleSheet.create({
     width: 80, // Mod sütunu için daha geniş
   },
   headerCell: {
-    backgroundColor: '#f2f2f2',
+    backgroundColor: '#eae9f2',
   },
-  
+
   // Metin stilleri
   tableHeaderText: {
     fontSize: 8,
@@ -60,20 +54,23 @@ const styles = StyleSheet.create({
     fontSize: 9,
     textAlign: 'left',
   },
-  
+
   // Mod renk stilleri (stil anahtarlarıyla eşleşir)
   rolanti: {
-    backgroundColor: '#B9C2CA', // Açık sarı
+    backgroundColor: '#B9C2CA',
   },
   eco: {
-    backgroundColor: '#0A8AD8', // Parlak sarı
+    backgroundColor: '#0A8AD8',
   },
   power: {
-    backgroundColor: '#FFA600', // Açık mavi
+    backgroundColor: '#FFA600',
   },
   powerPlus: {
-    backgroundColor: '#E84747', // Açık yeşil
-  }
-});
+    backgroundColor: '#E84747',
+  },
+  standart: {},
+  fuelTotal: {},
+  fuelAvg: {},
+};
 
 export default styles;
