@@ -22,17 +22,23 @@ import greenEL12 from "../../assets/markers/greenEl12Marker.png";
 import redEl12 from "../../assets/markers/redEl12Marker.png";
 
 
+import greenV16 from "../../assets/markers/v16_green.png";
+import redV16 from "../../assets/markers/v16_red.png";
+
+
+
+
 
 interface MapIconProps {
     type: string;
     state?: boolean;
 }
 
-const CustomMapMarker: React.ComponentType<MapIconProps> = ({type, state}) => {
+const CustomMapMarker: React.ComponentType<MapIconProps> = ({ type, state }) => {
     const imageStyle = {
         objectFit: 'contain' as const
     };
-    
+
     return (
         <div>
             {type === "MST Ekskavatör" && <img style={imageStyle} src={state == true ? greenMarkerExc : markerExc} alt="markerExc" />}
@@ -42,14 +48,17 @@ const CustomMapMarker: React.ComponentType<MapIconProps> = ({type, state}) => {
             {type === "Excavator" && <img style={imageStyle} src={state == true ? greenMarkerExc : markerExc} alt="markerExc" />}
             {type === "Forklift" && <img style={imageStyle} src={state == true ? greenMarkerTele : markerTele} alt="markerTele" />}
             {type === "Backhoeloader" && <img style={imageStyle} width={65} height={'auto'} src={state == true ? greenMarkerBackhoe : markerBachoe} alt="markerBachoe" />}
-            {type === "Telehandler" && <img style={imageStyle}  src={state == true ? greenMarkerTele : markerTele} alt="markerTele" />}
+            {type === "Telehandler" && <img style={imageStyle} src={state == true ? greenMarkerTele : markerTele} alt="markerTele" />}
             {type === "LOGO" && <img style={imageStyle} width={40} height={40} src={Logo} alt="LOGO" />}
             {type === "service" && <img style={imageStyle} width={65} height={'auto'} src={serviceMarker} alt="serviceMarker" />}
             {type === "Develon" && <img style={imageStyle} src={state == true ? greenDevelon : develon} alt="develon" />}
             {type === "Lift" && <img style={imageStyle} src={state == true ? greenEls : redEls} alt="markerTele" />}
-        
+
             {type === "AE15" && <img style={imageStyle} src={state == true ? greenAE15 : redAE15} alt="markerTele" />}
             {type === "EL12" && <img style={imageStyle} src={state == true ? greenEL12 : redEl12} alt="markerTele" />}
+
+            {type === "VM6" && <img style={imageStyle} src={state == true ? greenV16 : redV16} alt="markerTele" />}
+
         </div>
     )
 }
