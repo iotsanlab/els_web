@@ -67,7 +67,7 @@ async function fetchDeviceAttributes(device: Device) {
 
 function updateMachineStore(id: string, attrMap: Map<string, any>) {
   machineStore.setMachineData(id, {
-    type: attrMap.get('Type') || attrMap.get('Subtype') || 'Excavator',
+    type: attrMap.get('Subtype') || 'Excavator',
     model: attrMap.get('Model') || '',
     subtype: attrMap.get('Subtype') || '',
     serialNo: attrMap.get('SeriNo') || '',
