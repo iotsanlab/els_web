@@ -19,7 +19,7 @@ const CustomMapTypeControl = () => {
   const map = useMap();
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedType, setSelectedType] = useState<string>("roadmap");
+  const [selectedType, setSelectedType] = useState<string>("hybrid");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const mapTypes = [
@@ -54,7 +54,7 @@ const CustomMapTypeControl = () => {
   const currentLabel = mapTypes.find(type => type.id === selectedType)?.label || mapTypes[0].label;
 
   return (
-    <div 
+    <div
       ref={dropdownRef}
       className="absolute z-10 top-2 left-2"
     >
@@ -65,19 +65,19 @@ const CustomMapTypeControl = () => {
         style={{ borderRadius: '2px' }}
       >
         {currentLabel}
-        <svg 
-          className="w-3 h-3 ml-1" 
-          fill="none" 
-          stroke="currentColor" 
+        <svg
+          className="w-3 h-3 ml-1"
+          fill="none"
+          stroke="currentColor"
           viewBox="0 0 24 24"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
-      
+
       {/* Dropdown menü */}
       {isOpen && (
-        <div 
+        <div
           className="absolute left-0 mt-0 bg-white dark:bg-gray10 shadow-lg overflow-hidden min-w-[100px] border border-gray3"
           style={{ borderRadius: '2px' }}
         >
@@ -112,7 +112,7 @@ const GoogleMaps = ({ serviceLocations, className, onMarkerClick, onClick, extra
 
   const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
-  
+
 
   const center = useMemo(() => {
     if (serviceLocations.length === 0) {
@@ -137,10 +137,10 @@ const GoogleMaps = ({ serviceLocations, className, onMarkerClick, onClick, extra
   }, [serviceLocations]);
 
   const handleMarkerClick = (id: number, visible: boolean | undefined) => {
-  if (visible && onMarkerClick) {
-    onMarkerClick(id);
-  }
-};
+    if (visible && onMarkerClick) {
+      onMarkerClick(id);
+    }
+  };
 
   return (
     <APIProvider apiKey={API_KEY} version="3.64">
@@ -157,6 +157,7 @@ const GoogleMaps = ({ serviceLocations, className, onMarkerClick, onClick, extra
         onZoomChanged={(ev) => setZoom(ev.detail.zoom)}
         className={className}
         onClick={onClick}
+        mapTypeId={"hybrid"}
       >
         <CustomMapTypeControl />
         <ClusteredMarkers

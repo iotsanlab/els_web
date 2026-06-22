@@ -329,7 +329,7 @@ const AddReportModal = ({ isOpen, onClose, onSubmit }: Props) => {
                       value={selectedDateRange}
                       onDateSelect={(startDate: Date, endDate: Date) => {
                         setSelectedDateRange([startDate, endDate]);
-                        setSelectedDate(`${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`);
+                        setSelectedDate(`${startDate.toLocaleDateString("tr-TR")} - ${endDate.toLocaleDateString("tr-TR")}`);
                       }}  // Seçilen tarih aralığını state'e kaydet
                     />
                   </div>

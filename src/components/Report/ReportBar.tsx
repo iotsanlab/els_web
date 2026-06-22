@@ -50,7 +50,9 @@ const ReportBar = ({
         <span className="text-gray6 font-inter font-bold text-[12px] tracking-wide">{report.name}</span>
       </div>
       <div className="h-full w-64 items-center flex pl-3 border-l-[0.5px] border-l-gray2 dark:border-l-gray8 border-b-[0.5px] border-b-gray2 dark:border-b-gray8">
-        <span className="text-gray6 font-inter font-medium text-[12px] tracking-wide">{report.type == "hours" ? t("global.schema1") : t("global.schema2") }</span>
+        <span className="text-gray6 font-inter font-medium text-[12px] tracking-wide">
+          {report.type === "hours" ? t("global.schema1") : report.type === "performance" ? t("global.schema3") : t("global.schema2")}
+        </span>
       </div>
       <div className="h-full w-48 items-center flex pl-3 border-l-[0.5px] border-l-gray2 dark:border-l-gray8 border-b-[0.5px] border-b-gray2 dark:border-b-gray8">
         <span className="text-gray6 font-inter font-medium text-[12px] tracking-wide">{report.timePeriod}</span>

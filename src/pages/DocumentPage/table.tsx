@@ -44,7 +44,7 @@ const PDFTable = ({
     {
       machineName: 'M220CEC100240',
       serialNumber: 'M220CEC100240',
-      class: 'Excavator',
+      class: 'Lift',
       model: 'M220LC',
       totalWorkHours: '6 sa 5 dak',
       idleTime: '1 sa 24 dak',
@@ -85,7 +85,7 @@ const PDFTable = ({
             <div
               key={`${rowIndex}-${colIndex}`}
               style={{
-                ...styles.tableNoColBorder,
+                ...styles.tableCol,
                 ...column.style,
                 ...colorScheme[column.key],
               }}

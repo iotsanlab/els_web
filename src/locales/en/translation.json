@@ -1,5 +1,12 @@
 {
   "global": {
+    "clearChat": "Clear",
+    "lastWeek": "Last Week",
+    "lastMonth": "Last Month",
+    "thisMonth": "This Month",
+    "thisWeek": "This Week",
+    "previousMonth": "Previous Month",
+    "previousWeek": "Previous Week",
     "kWh": "kWh",
     "kWh/s": "kWh",
     "idealConsumption": "Ideal Consumption",

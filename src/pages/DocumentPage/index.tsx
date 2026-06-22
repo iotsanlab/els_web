@@ -144,7 +144,7 @@ const printBtnStyle: React.CSSProperties = {
   bottom: 32,
   right: 32,
   zIndex: 1000,
-  background: "#005A9C",
+  background: "#e12627",
   color: "#fff",
   border: "none",
   borderRadius: 8,
@@ -378,17 +378,17 @@ const DocumentPage = () => {
       .sort((a, b) => b.totalHours - a.totalHours);
 
     const rows = sortedMachines.map(({ machine, totalHours }, index) => {
-        if (totalHours > 0) {
-            return {
-                rowNumber: (index + 1).toString(),
-                machineName: machine.name,
-                class: "Excavator",
-                model: machine.model,
-                serialNumber: machine.serialNo,
-                totalWorkHours: totalHours.toFixed(2),
-            };
-        }
-        return null;
+      if (totalHours > 0) {
+        return {
+          rowNumber: (index + 1).toString(),
+          machineName: machine.name,
+          class: "Lift",
+          model: machine.model,
+          serialNumber: machine.serialNo,
+          totalWorkHours: totalHours.toFixed(2),
+        };
+      }
+      return null;
     }).filter(row => row !== null);
 
     const columns = [
@@ -420,7 +420,7 @@ const DocumentPage = () => {
       return {
         rowNumber: (index + 1).toString(),
         machineName: machine.name,
-        class: machine.type || "EL12",
+        class: "Lift",
         model: machine.model,
         serialNumber: machine.serialNo,
         totalFuel: totalEnergy.toFixed(2) + ' kWh',
@@ -464,7 +464,7 @@ const DocumentPage = () => {
       ({ machine, totalEnergy, totalHours, avgEnergy }, index) => ({
         rowNumber: (index + 1).toString(),
         machineName: machine.name,
-        class: machine.type || "EL12",
+        class: "Lift",
         model: machine.model,
         serialNumber: machine.serialNo,
         totalWorkHours: totalHours.toFixed(2).replace('.', ',') + " " + t("global.h"),

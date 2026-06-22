@@ -46,8 +46,8 @@ const TreeCheckbox: React.FC<TreeCheckboxProps> = ({
     const machines = machineStore.getAllMachines();
 
     const machineList = machines.reduce<Record<string, Machine[]>>((acc, machine) => {
-      const type = machine.type || "Unknown";
-      
+      const type = machine.subtype || "Unknown";
+
       if (!acc[type]) {
         acc[type] = [];
       }
@@ -81,7 +81,7 @@ const TreeCheckbox: React.FC<TreeCheckboxProps> = ({
       }))
     }));
 
-    console.log("TreeCheckbox - Oluşturulan liste:", result);
+    //console.log("TreeCheckbox - Oluşturulan liste:", result);
     return result;
   }, [initialItems, isAllNotVisible]);
 
@@ -108,7 +108,7 @@ const TreeCheckbox: React.FC<TreeCheckboxProps> = ({
       if (item.children) {
         const checkedChildren = item.children.filter(child => child.checked).length;
         const totalChildren = item.children.length;
-        
+
         return {
           ...item,
           indeterminate: checkedChildren > 0 && checkedChildren < totalChildren,
@@ -162,13 +162,13 @@ const TreeCheckbox: React.FC<TreeCheckboxProps> = ({
       }
 
       const finalItems = calculateIndeterminate(updatedItems);
-      
+
       // Değişikliği parent'a bildir
       if (onChange) {
         console.log("TreeCheckbox - onChange tetiklendi:", finalItems);
         onChange(finalItems);
       }
-      
+
       return finalItems;
     });
   }, [isAllNotVisible, selectedType, calculateIndeterminate, onChange]);
@@ -178,10 +178,10 @@ const TreeCheckbox: React.FC<TreeCheckboxProps> = ({
     setItems(prevItems => {
       let updatedItems = prevItems.map(item => {
         if (item.id === parentId && item.children) {
-          const updatedChildren = item.children.map(child => 
+          const updatedChildren = item.children.map(child =>
             child.id === childId ? { ...child, checked } : child
           );
-          
+
           return { ...item, children: updatedChildren };
         }
         return item;
@@ -218,13 +218,13 @@ const TreeCheckbox: React.FC<TreeCheckboxProps> = ({
       }
 
       const finalItems = calculateIndeterminate(updatedItems);
-      
+
       // Değişikliği parent'a bildir
       if (onChange) {
         console.log("TreeCheckbox - onChange tetiklendi:", finalItems);
         onChange(finalItems);
       }
-      
+
       return finalItems;
     });
   }, [isAllNotVisible, selectedType, calculateIndeterminate, onChange]);
@@ -257,8 +257,8 @@ const TreeCheckbox: React.FC<TreeCheckboxProps> = ({
     return (
       <div key={item.id} className="mb-3 group font-inter">
         <label
-            htmlFor={`parent-${item.id}`}  // ⬅️ Eklenen satır
-            className={`flex items-center ${item.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+          htmlFor={`parent-${item.id}`}  // ⬅️ Eklenen satır
+          className={`flex items-center ${item.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
           <CheckboxInput
             id={`parent-${item.id}`}
             checked={item.checked}
@@ -268,7 +268,7 @@ const TreeCheckbox: React.FC<TreeCheckboxProps> = ({
           />
           <span className="ml-2 font-medium text-gray-700 dark:text-white">{item.label}</span>
         </label>
-        
+
         {item.children && item.children.length > 0 && (
           <div className="hidden pl-4 mt-2 ml-6 transition-opacity duration-300 border-l border-gray-300 border-dashed group-hover:block">
             {item.children.map(child => (

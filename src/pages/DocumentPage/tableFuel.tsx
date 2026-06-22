@@ -41,7 +41,7 @@ const PDFTableFuel = ({
     {
       machineName: "M220CEC100240",
       serialNumber: "M220CEC100240",
-      class: "Excavator",
+      class: "Lift",
       model: "M220LC",
       totalFuel: "128.5",
       avgFuel: "12.3",

@@ -1,5 +1,12 @@
 {
   "global": {
+    "clearChat": "Temizle",
+    "lastWeek": "Son 1 Hafta",
+    "lastMonth": "Son 1 Ay",
+    "thisMonth": "Bu Ay",
+    "thisWeek": "Bu Hafta",
+    "previousMonth": "Geçen Ay",
+    "previousWeek": "Geçen Hafta",
     "kWh": "kWh",
     "kWh/s": "kWh",
     "idealConsumption": "İdeal Tüketim",
@@ -493,6 +500,13 @@
     }
   },
   "documentPage": {
+    "dateRange": "Tarih Aralığı",
+    "creator": "Oluşturan",
+    "creationDate": "Oluşturma Tarihi",
+    "reportDuration": "Rapor Tarih Süresi",
+    "reportType": "Rapor Tipi",
+    "reportDateRange": "Rapor Tarih Süresi",
+    "days": "gün",
     "title": "Rapor",
     "idle": "Rölanti",
     "eco": "Eco",

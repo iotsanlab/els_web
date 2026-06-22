@@ -16,7 +16,7 @@ const styles: Record<string, React.CSSProperties> = {
         fontFamily: 'Roboto, sans-serif',
     },
     header: {
-        backgroundColor: "#005A9C",
+        backgroundColor: "#e12627",
         padding: 5,
         marginLeft: 10,
         marginRight: 10,
@@ -120,6 +120,7 @@ const styles: Record<string, React.CSSProperties> = {
         padding: 5,
         textAlign: 'center',
         borderRight: '1px solid #d6d6d6',
+        borderBottom: '1px solid #d6d6d6',
         fontSize: 14,
         display: 'flex',
         justifyContent: 'center',
